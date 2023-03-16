@@ -1,129 +1,78 @@
 #!/bin/bash
 
-# Verificar si el script se está ejecutando como root
-if [[ $(id -u) -ne 0 ]]; then
-   echo "Este script debe ser ejecutado como root"
-   exit 1
-fi
-
-# Crear particiones.
-
 # Variables
 DEVICE="/dev/sda"
-BOOT_SIZE="+512M"
-SWAP_SIZE="+2G"
-ROOT_SIZE=""
+HOSTNAME="myhostname"
+USERNAME="myusername"
+PASSWORD="mypassword"
+TIMEZONE="America/Los_Angeles"
+LOCALE="en_US.UTF-8"
+KEYMAP="us"
 
-# Verificar que el dispositivo de destino es correcto
-read -p "Este script creará particiones en ${DEVICE}. ¿Estás seguro? (y/n): " DEVICE_CONFIRM
-if [ "$DEVICE_CONFIRM" != "y" ]; then
-  echo "Operación cancelada"
+# Verificar que se ejecuta como superusuario
+if [ "$(whoami)" != "root" ]; then
+  echo "Este script debe ser ejecutado como superusuario"
   exit 1
 fi
 
-# Crear partición /boot
-echo "Creando partición /boot..."
-echo "n
-p
-1
+# Actualizar el reloj del sistema
+timedatectl set-ntp true
 
-${BOOT_SIZE}
-w
-" | fdisk $DEVICE
-
-# Formatear partición /boot
-echo "Formateando partición /boot..."
+# Formatear la partición /boot
 mkfs.ext4 ${DEVICE}1
+
+# Formatear la partición raíz
+mkfs.ext4 ${DEVICE}2
+
+# Montar las particiones
+mount ${DEVICE}2 /mnt
 mkdir /mnt/boot
 mount ${DEVICE}1 /mnt/boot
 
-# Crear partición swap
-echo "Creando partición swap..."
-echo "n
-p
-2
+# Instalar el sistema base
+pacstrap /mnt base base-devel linux linux-firmware vim grub dialog
 
-${SWAP_SIZE}
-t
-2
-w
-" | fdisk $DEVICE
+# Generar el archivo fstab
+genfstab -U /mnt >> /mnt/etc/fstab
 
-# Formatear partición swap
-echo "Formateando partición swap..."
-mkswap ${DEVICE}2
-swapon ${DEVICE}2
-
-# Crear partición /
-echo "Creando partición /..."
-echo "n
-p
-3
-
-w
-" | fdisk $DEVICE
-
-# Formatear partición /
-echo "Formateando partición /..."
-mkfs.ext4 ${DEVICE}3
-mount ${DEVICE}3 /mnt
-
-echo "Particiones creadas y montadas con éxito"
+# Configurar el sistema instalado
+arch-chroot /mnt /bin/bash <<EOF
 
 # Configurar el idioma y el teclado
 echo "Configurando el idioma y el teclado..."
-echo "es_ES.UTF-8 UTF-8" > /etc/locale.gen
+echo LANG=$LOCALE >> /etc/locale.conf
+echo KEYMAP=$KEYMAP >> /etc/vconsole.conf
+sed -i "s/#$LOCALE/$LOCALE/" /etc/locale.gen
 locale-gen
-echo "LANG=es_ES.UTF-8" > /etc/locale.conf
-echo "KEYMAP=es" > /etc/vconsole.conf
-echo ""
 
 # Configurar la zona horaria
 echo "Configurando la zona horaria..."
-ln -sf /usr/share/zoneinfo/America/Argentina/Buenos_Aires /etc/localtime
+ln -sf /usr/share/zoneinfo/$TIMEZONE /etc/localtime
 hwclock --systohc
-echo ""
 
-# Configurar la red
-echo "Configurando la red..."
-read -p "Ingrese el nombre del equipo: " hostname
-echo "$hostname" > /etc/hostname
+# Configurar el nombre del host
+echo "Configurando el nombre del host..."
+echo $HOSTNAME > /etc/hostname
 echo "127.0.0.1	localhost" > /etc/hosts
 echo "::1		localhost" >> /etc/hosts
-echo "127.0.1.1	$hostname.localdomain	$hostname" >> /etc/hosts
-systemctl enable dhcpcd.service
-echo ""
+echo "127.0.1.1	$HOSTNAME.localdomain	$HOSTNAME" >> /etc/hosts
 
-# Configurar el gestor de arranque
-echo "Configurando el gestor de arranque..."
-pacman -S grub
-grub-install --target=i386-pc /dev/sda
+# Establecer la contraseña de root
+echo "Estableciendo la contraseña de root..."
+echo "root:$PASSWORD" | chpasswd
+
+# Crear un usuario y establecer su contraseña
+echo "Creando usuario..."
+useradd -m -G wheel $USERNAME
+echo "$USERNAME:$PASSWORD" | chpasswd
+
+# Configurar GRUB
+echo "Configurando GRUB..."
+grub-install --target=i386-pc $DEVICE
 grub-mkconfig -o /boot/grub/grub.cfg
-echo ""
 
-# Configurar la contraseña del usuario root
-echo "Configurando la contraseña del usuario root..."
-passwd
-echo ""
+EOF
 
-# Crear un usuario
-echo "Creando un usuario..."
-read -p "Ingrese el nombre de usuario: " username
-useradd -m $username
-passwd $username
-usermod -aG wheel,audio,video,optical,storage $username
-echo ""
-
-# Instalar los paquetes básicos
-echo "Instalando los paquetes básicos..."
-pacman -S xorg-server xorg-xinit xfce4 xfce4-goodies lightdm lightdm-gtk-greeter firefox
-echo ""
-
-# Activar el gestor de inicio
-echo "Activando el gestor de inicio..."
-systemctl enable lightdm.service
-systemctl start lightdm.service
-echo ""
-
-# Fin de la instalación
-echo "La instalación ha finalizado. Por favor, reinicie el equipo."
+# Desmontar las particiones y reiniciar el sistema
+umount -R /mnt
+echo "La instalación ha finalizado con éxito. Reinicia el sistema."
