@@ -2,8 +2,8 @@
 
 # Definir variables
 root_password="at15Passw0rd"   # Establecer la contraseña de root
-hostname="Ayoub_Qtile"        # Establecer el nombre de host
-username="Ayoub"            # Establecer el nombre de usuario
+hostname="ayoub_qtile"        # Establecer el nombre de host
+username="ayoub"            # Establecer el nombre de usuario
 user_password="at15Passw0rd"   # Establecer la contraseña del usuario
 
 # Verificar si el sistema está conectado a Internet
