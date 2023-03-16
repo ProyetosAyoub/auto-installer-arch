@@ -1,62 +1,63 @@
-#Instalacion completo de arch mediante script.
-
 #!/bin/bash
 
-# Verificar si el script se está ejecutando como root
-if [[ $(id -u) -ne 0 ]]; then
-   echo "Este script debe ser ejecutado como root"
-   exit 1
+# Definir variables
+root_password="at15Passw0rd"   # Establecer la contraseña de root
+hostname="Ayoub_Qtile"        # Establecer el nombre de host
+username="Ayoub"            # Establecer el nombre de usuario
+user_password="at15Passw0rd"   # Establecer la contraseña del usuario
+
+# Verificar si el sistema está conectado a Internet
+if ! ping -c 1 google.com &> /dev/null
+then
+    echo "El sistema no está conectado a Internet. Conéctese a una red y vuelva a ejecutar el script."
+    exit
 fi
 
-# Configurar el idioma y el teclado
-echo "Configurando el idioma y el teclado..."
-echo "es_ES.UTF-8 UTF-8" > /etc/locale.gen
-locale-gen
-echo "LANG=es_AR.UTF-8" > /etc/locale.conf
-echo "KEYMAP=es" > /etc/vconsole.conf
-echo ""
+# Establecer la contraseña de root
+echo "Estableciendo la contraseña de root"
+echo "root:$root_password" | chpasswd
 
-# Configurar la zona horaria
-echo "Configurando la zona horaria..."
-ln -sf /usr/share/zoneinfo/Europe/Spain/Madrid /etc/localtime
-hwclock --systohc
-echo ""
+# Actualizar la lista de paquetes y realizar actualizaciones
+echo "Actualizando el sistema"
+pacman -Syu --noconfirm
 
-# Configurar la red
-echo "Configurando la red..."
-read -p "Ingrese el nombre del equipo: " hostname
-echo "$hostname" > /etc/hostname
-echo "127.0.0.1	localhost" > /etc/hosts
-echo "::1		localhost" >> /etc/hosts
-echo "127.0.1.1	$hostname.localdomain	$hostname" >> /etc/hosts
-systemctl enable dhcpcd.service
-echo ""
+# Instalar paquetes requeridos
+echo "Instalando paquetes"
+pacman -S xorg-server xorg-xinit xorg-xsetroot xterm qtile --noconfirm
 
-# Configurar el gestor de arranque
-echo "Configurando el gestor de arranque..."
-pacman -S grub
+# Crear el archivo de inicio de sesión para el usuario
+echo "Creando el archivo .xinitrc"
+echo "exec qtile" > /home/$username/.xinitrc
+chown $username:$username /home/$username/.xinitrc
+
+# Configurar el gestor de arranque GRUB
+echo "Instalando GRUB en el disco"
+pacman -S grub --noconfirm
 grub-install --target=i386-pc /dev/sda
 grub-mkconfig -o /boot/grub/grub.cfg
-echo ""
 
-# Configurar la contraseña del usuario root
-echo "Configurando la contraseña del usuario root..."
-passwd
-echo ""
+# Configurar la red
+echo "Configurando la red"
+pacman -S networkmanager --noconfirm
+systemctl enable NetworkManager.service
+
+# Configurar la zona horaria
+echo "Configurando la zona horaria"
+ln -sf /usr/share/zoneinfo/Europe/Madrid /etc/localtime
+hwclock --systohc --utc
+
+# Configurar el nombre de host y el archivo de hosts
+echo "Configurando el nombre de host y el archivo de hosts"
+echo "$hostname" > /etc/hostname
+echo "127.0.0.1 localhost" > /etc/hosts
+echo "::1 localhost" >> /etc/hosts
+echo "127.0.1.1 $hostname.localdomain $hostname" >> /etc/hosts
 
 # Crear un usuario
-echo "Creando un usuario..."
-read -p "Ingrese el nombre de usuario: " username
+echo "Creando un usuario"
 useradd -m $username
-passwd $username
-usermod -aG wheel,audio,video,optical,storage $username
-echo ""
+echo "$username:$user_password" | chpasswd
 
-# Instalar los paquetes básicos
-echo "Instalando los paquetes básicos..."
-pacman -S xorg-server xorg-xinit xfce4 xfce4-goodies lightdm lightdm-gtk-greeter firefox
-echo ""
-
-
-# Fin de la instalación
-echo "La instalación ha finalizado. Por favor, reinicie el equipo."
+# Finalizar la instalación
+echo "La instalación ha finalizado. Reiniciando el sistema."
+reboot
