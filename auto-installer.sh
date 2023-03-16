@@ -1,12 +1,12 @@
 #!/bin/bash
 
 # Configuración de variables de entorno
-HOSTNAME="Arch-Ayoub"   # nombre de host para el sistema
-ROOT_PASSWORD="at15Passw0rd"   # contraseña para la cuenta root
-USERNAME="Ayoub"           # nombre de usuario para la cuenta de usuario
-USER_PASSWORD="at15Passw0rd"       # contraseña para la cuenta de usuario
-TIMEZONE="Europe/Spain" # zona horaria para el sistema
-LOCALE="en_ES.UTF-8"        # configuración regional del sistema
+HOSTNAME="my-arch-system"   # nombre de host para el sistema
+ROOT_PASSWORD="myrootpwd"   # contraseña para la cuenta root
+USERNAME="myuser"           # nombre de usuario para la cuenta de usuario
+USER_PASSWORD="mypwd"       # contraseña para la cuenta de usuario
+TIMEZONE="America/New_York" # zona horaria para el sistema
+LOCALE="en_US.UTF-8"        # configuración regional del sistema
 DISK="/dev/sda"             # dispositivo de almacenamiento donde se instalará Arch
 
 # Verificación de los requisitos del sistema
@@ -65,7 +65,7 @@ echo "%wheel ALL=(ALL) ALL" >> /mnt/etc/sudoers
 umount -R /mnt
 
 # Mostrar mensaje de advertencia
-echo "¡Instalación completada! Recuerde retirar el disco o USB antes de reiniciar el sistema."
+echo "¡Instalación completada! Recuerde retirar el disco o USB antes de encender el sistema."
 
-# Reiniciar sistema
-reboot
+# Apagar el sistema
+shutdown -P now
