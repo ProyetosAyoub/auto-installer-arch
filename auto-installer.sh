@@ -2,12 +2,12 @@
 
 # Variables
 DEVICE="/dev/sda"
-HOSTNAME="myhostname"
-USERNAME="myusername"
-PASSWORD="mypassword"
-TIMEZONE="America/Los_Angeles"
-LOCALE="en_US.UTF-8"
-KEYMAP="us"
+HOSTNAME="Ayoub_Arch"
+USERNAME="Ayoub"
+PASSWORD="at15Passw0rd"
+TIMEZONE="Spain/Madrid"
+LOCALE="en_ES.UTF-8"
+KEYMAP="es"
 
 # Verificar que se ejecuta como superusuario
 if [ "$(whoami)" != "root" ]; then
