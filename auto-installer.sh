@@ -59,6 +59,7 @@ echo ""
 
 # Activar el gestor de inicio
 echo "Activando el gestor de inicio..."
+systemctl start lightdm.service
 systemctl enable lightdm.service
 echo ""
 
