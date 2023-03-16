@@ -60,4 +60,4 @@ echo "$username:$user_password" | chpasswd
 
 # Finalizar la instalación
 echo "La instalación ha finalizado. Reiniciando el sistema."
-reboot
+shutdown
