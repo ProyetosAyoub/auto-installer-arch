@@ -1,78 +1,71 @@
 #!/bin/bash
 
-# Variables
-DEVICE="/dev/sda"
-HOSTNAME="Ayoub_Arch"
-USERNAME="Ayoub"
-PASSWORD="at15Passw0rd"
-TIMEZONE="Spain/Madrid"
-LOCALE="en_ES.UTF-8"
-KEYMAP="es"
+# Configuración de variables de entorno
+HOSTNAME="Arch-Ayoub"   # nombre de host para el sistema
+ROOT_PASSWORD="at15Passw0rd"   # contraseña para la cuenta root
+USERNAME="Ayoub"           # nombre de usuario para la cuenta de usuario
+USER_PASSWORD="at15Passw0rd"       # contraseña para la cuenta de usuario
+TIMEZONE="Europe/Spain" # zona horaria para el sistema
+LOCALE="en_ES.UTF-8"        # configuración regional del sistema
+DISK="/dev/sda"             # dispositivo de almacenamiento donde se instalará Arch
 
-# Verificar que se ejecuta como superusuario
-if [ "$(whoami)" != "root" ]; then
-  echo "Este script debe ser ejecutado como superusuario"
-  exit 1
+# Verificación de los requisitos del sistema
+if [[ $(id -u) -ne 0 ]]; then
+    echo "Este script debe ser ejecutado como root"
+    exit 1
 fi
 
-# Actualizar el reloj del sistema
-timedatectl set-ntp true
+if [[ ! -d /sys/firmware/efi/efivars ]]; then
+    echo "Este script solo se puede ejecutar en sistemas BIOS"
+    exit 1
+fi
 
-# Formatear la partición /boot
-mkfs.ext4 ${DEVICE}1
+# Crear particiones y formatearlas
+parted --script ${DISK} \
+    mklabel msdos \
+    mkpart primary ext4 1MiB 50% \
+    mkpart primary ext4 50% 100% \
+    set 1 boot on
 
-# Formatear la partición raíz
-mkfs.ext4 ${DEVICE}2
+mkfs.ext4 ${DISK}1
+mkfs.ext4 ${DISK}2
 
-# Montar las particiones
-mount ${DEVICE}2 /mnt
-mkdir /mnt/boot
-mount ${DEVICE}1 /mnt/boot
+# Montar particiones
+mount ${DISK}1 /mnt
+mkdir /mnt/home
+mount ${DISK}2 /mnt/home
 
-# Instalar el sistema base
-pacstrap /mnt base base-devel linux linux-firmware vim grub dialog
+# Configuración de la zona horaria
+ln -sf /usr/share/zoneinfo/${TIMEZONE} /mnt/etc/localtime
+hwclock --systohc --utc --noadjfile
 
-# Generar el archivo fstab
-genfstab -U /mnt >> /mnt/etc/fstab
+# Configuración regional
+echo "${LOCALE} UTF-8" >> /mnt/etc/locale.gen
+arch-chroot /mnt locale-gen
+echo "LANG=${LOCALE}" > /mnt/etc/locale.conf
 
-# Configurar el sistema instalado
-arch-chroot /mnt /bin/bash <<EOF
+# Configuración del nombre de host
+echo "${HOSTNAME}" > /mnt/etc/hostname
 
-# Configurar el idioma y el teclado
-echo "Configurando el idioma y el teclado..."
-echo LANG=$LOCALE >> /etc/locale.conf
-echo KEYMAP=$KEYMAP >> /etc/vconsole.conf
-sed -i "s/#$LOCALE/$LOCALE/" /etc/locale.gen
-locale-gen
+# Configuración de la contraseña de root
+echo "root:${ROOT_PASSWORD}" | arch-chroot /mnt chpasswd
 
-# Configurar la zona horaria
-echo "Configurando la zona horaria..."
-ln -sf /usr/share/zoneinfo/$TIMEZONE /etc/localtime
-hwclock --systohc
+# Instalación del sistema base y del cargador de arranque GRUB
+pacstrap /mnt base
+pacstrap /mnt grub
+arch-chroot /mnt grub-install --recheck ${DISK}
+arch-chroot /mnt grub-mkconfig -o /boot/grub/grub.cfg
 
-# Configurar el nombre del host
-echo "Configurando el nombre del host..."
-echo $HOSTNAME > /etc/hostname
-echo "127.0.0.1	localhost" > /etc/hosts
-echo "::1		localhost" >> /etc/hosts
-echo "127.0.1.1	$HOSTNAME.localdomain	$HOSTNAME" >> /etc/hosts
+# Configuración de la cuenta de usuario
+arch-chroot /mnt useradd -m -G wheel -s /bin/bash ${USERNAME}
+echo "${USERNAME}:${USER_PASSWORD}" | arch-chroot /mnt chpasswd
+echo "%wheel ALL=(ALL) ALL" >> /mnt/etc/sudoers
 
-# Establecer la contraseña de root
-echo "Estableciendo la contraseña de root..."
-echo "root:$PASSWORD" | chpasswd
-
-# Crear un usuario y establecer su contraseña
-echo "Creando usuario..."
-useradd -m -G wheel $USERNAME
-echo "$USERNAME:$PASSWORD" | chpasswd
-
-# Configurar GRUB
-echo "Configurando GRUB..."
-grub-install --target=i386-pc $DEVICE
-grub-mkconfig -o /boot/grub/grub.cfg
-
-EOF
-
-# Desmontar las particiones y reiniciar el sistema
+# Desmontar particiones
 umount -R /mnt
-echo "La instalación ha finalizado con éxito. Reinicia el sistema."
+
+# Mostrar mensaje de advertencia
+echo "¡Instalación completada! Recuerde retirar el disco o USB antes de reiniciar el sistema."
+
+# Reiniciar sistema
+reboot
