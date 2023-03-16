@@ -57,11 +57,6 @@ echo "Instalando los paquetes básicos..."
 pacman -S xorg-server xorg-xinit xfce4 xfce4-goodies lightdm lightdm-gtk-greeter firefox
 echo ""
 
-# Activar el gestor de inicio
-echo "Activando el gestor de inicio..."
-systemctl start lightdm.service
-systemctl enable lightdm.service
-echo ""
 
 # Fin de la instalación
 echo "La instalación ha finalizado. Por favor, reinicie el equipo."
