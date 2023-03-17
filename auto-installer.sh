@@ -1,83 +1,91 @@
 #!/bin/bash
 
-# Ask for disk name
-echo "Please enter the name of the disk you want to install Arch Linux on (e.g. /dev/sda):"
+# Pedir el disco
+echo "Ingrese el disco a utilizar (ej: /dev/sda):"
 read disk
 
-# Ask for partition sizes
-echo "Please enter the size of the root partition in GB (e.g. 20):"
-read root_size
+# Crear particiones
+while true; do
+  echo "Ingrese el tamaño para la partición raíz (ej: 20G) (deje en blanco para continuar):"
+  read root_size
+  if [[ -z "$root_size" ]]; then
+    echo "No se ha especificado el tamaño para la partición raíz."
+    exit 1
+  else
+    break
+  fi
+done
 
-echo "Please enter the size of the home partition in GB (e.g. 50):"
-read home_size
+while true; do
+  echo "Ingrese el tamaño para la partición swap (ej: 2G) (deje en blanco para continuar):"
+  read swap_size
+  if [[ -z "$swap_size" ]]; then
+    echo "No se ha especificado el tamaño para la partición swap."
+    exit 1
+  else
+    break
+  fi
+done
 
-echo "Please enter the size of the swap partition in GB (e.g. 8):"
-read swap_size
+fdisk ${disk} << EOF
+o
+n
+p
+1
 
-# Calculate partition sizes
-root_end=$((root_size + home_size + swap_size + 1))GB
-home_end=$((home_size + swap_size + 1))GB
-swap_end=$((swap_size + 1))GB
++512M
+t
+1
+b
+n
+p
+2
 
-# Create partitions
-sgdisk -o ${disk}
-sgdisk -n 1:2048:+512M -t 1:ef02 -c 1:"BIOS boot partition" ${disk}
-sgdisk -n 2:0:${root_end} -t 2:8300 -c 2:"Linux root partition" ${disk}
-sgdisk -n 3:0:${home_end} -t 3:8300 -c 3:"Linux home partition" ${disk}
-sgdisk -n 4:0:${swap_end} -t 4:8200 -c 4:"Linux swap partition" ${disk}
++${root_size}
+n
+p
+3
 
-# Make the boot partition bootable
-sgdisk ${disk} -A 1:set:2
++${swap_size}
+t
+3
+82
+w
+EOF
 
-# Format partitions
-mkfs.ext4 ${disk}2
+# Formatear particiones
+mkfs.ext2 ${disk}1
 mkfs.ext4 ${disk}3
-mkswap ${disk}4
-swapon ${disk}4
+mkswap ${disk}2
 
-# Mount partitions
-mount ${disk}2 /mnt
-mkdir /mnt/home
-mount ${disk}3 /mnt/home
+# Montar particiones
+mount ${disk}3 /mnt
+mkdir /mnt/boot
+mount ${disk}1 /mnt/boot
+swapon ${disk}2
 
-# Install base system
+# Instalar Arch Linux
 pacstrap /mnt base base-devel linux linux-firmware
 
-# Generate fstab
+# Generar fstab
 genfstab -U /mnt >> /mnt/etc/fstab
 
-# Chroot into the new system
-arch-chroot /mnt
+# Crear el directorio para el root
+mkdir /mnt/root
 
-# Set the timezone
-ln -sf /usr/share/zoneinfo/America/New_York /etc/localtime
-hwclock --systohc
+# Configuración del sistema
+# ...
 
-# Set the locale
-sed -i 's/^#en_US.UTF-8/en_US.UTF-8/' /etc/locale.gen
-locale-gen
-echo "LANG=en_US.UTF-8" >> /etc/locale.conf
-
-# Set the hostname
-echo "Please enter the hostname for the system:"
-read hostname
-echo "${hostname}" > /etc/hostname
-
-# Set the root password
-echo "Please set the root password:"
-passwd
-
-# Install and configure the bootloader
+# Instalar y configurar el bootloader
 pacman -S grub
 
 grub-install --target=i386-pc --recheck ${disk}
 
-sed -i 's/^GRUB_TIMEOUT=5/GRUB_TIMEOUT=0/' /etc/default/grub
-grub-mkconfig -o /boot/grub/grub.cfg
+sed -i 's/^GRUB_TIMEOUT=5/GRUB_TIMEOUT=0/' /mnt/etc/default/grub
+grub-mkconfig -o /mnt/boot/grub/grub.cfg
 
-# Exit chroot and unmount partitions
-exit
-
+# Salir de chroot y desmontar particiones
 umount -R /mnt
+swapoff -a
 
-echo "Arch Linux has been installed successfully. You may now remove the installation media and reboot the system."
+echo "La instalación de Arch Linux se ha completado. Puede reiniciar el sistema y retirar el medio de instalación."
