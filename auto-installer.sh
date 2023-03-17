@@ -56,5 +56,3 @@ swapoff ${DISK}2
 # Mostrar mensaje de advertencia
 echo "¡Instalación completada! Recuerde retirar el disco o USB antes de encender el sistema."
 
-# Apagar el sistema
-shutdown -P now
