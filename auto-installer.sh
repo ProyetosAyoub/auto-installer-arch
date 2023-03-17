@@ -1,58 +1,70 @@
 #!/bin/bash
 
-# Verificación de los requisitos del sistema
-if [[ $(id -u) -ne 0 ]]; then
-    echo "Este script debe ser ejecutado como root"
+# Mensaje de bienvenida
+echo "Bienvenido a la instalación automática de Arch Linux UEFI"
+
+# Solicitar la cantidad de particiones a crear
+read -p "¿Cuántas particiones desea crear? " num_partitions
+
+# Si no se ingresó un número, salir del script
+if ! [[ "$num_partitions" =~ ^[0-9]+$ ]]; then
+    echo "Debe ingresar un número. Saliendo del script."
     exit 1
 fi
 
-# Preguntar al usuario la cantidad de almacenamiento que se debe utilizar para la partición raíz
-read -p "Introduzca la cantidad de almacenamiento que desea para la partición raíz (/) (ejemplo: 30G, 1T): " ROOT_SIZE
+# Solicitar el tamaño de la partición swap
+read -p "Ingrese el tamaño de la partición swap en MB (por defecto: 4096MB): " swap_size
 
-# Crear particiones y formatearlas
-parted --script ${DISK} \
-    mklabel msdos \
-    mkpart primary ext4 1MiB ${ROOT_SIZE} \
-    mkpart primary linux-swap ${ROOT_SIZE} 100% \
-    set 1 boot on
+# Si no se ingresó un tamaño de partición swap, usar el valor predeterminado
+if [[ -z "$swap_size" ]]; then
+    swap_size=4096
+fi
 
-mkfs.ext4 ${DISK}1
-mkswap ${DISK}2
-swapon ${DISK}2
+# Formatear el disco
+echo "Formateando el disco..."
+(
+  echo o;
+  echo n;
+  echo;
+  echo;
+  for ((i=1;i<num_partitions;i+=1)); do
+    echo n;
+    echo;
+    echo;
+  done
+  echo;
+  echo t;
+  echo 1;
+  echo 1;
+  for ((i=2;i<=num_partitions;i+=1)); do
+    echo t;
+    echo $i;
+    echo $i;
+  done
+  echo w;
+) | fdisk /dev/sda
 
-# Montar particiones
-mount ${DISK}1 /mnt
+# Crear y activar la partición swap
+echo "Creando partición swap..."
+mkswap /dev/sda2
+swapon /dev/sda2
 
-# Configuración de la zona horaria
-timedatectl set-ntp true
-timedatectl set-timezone America/New_York
+# Formatear las particiones y montar el sistema de archivos
+echo "Formateando las particiones..."
+for ((i=1;i<=num_partitions;i+=1)); do
+    mkfs.ext4 /dev/sda$i
+    mkdir /mnt/part$i
+    mount /dev/sda$i /mnt/part$i
+done
 
-# Instalación de paquetes del sistema base y del cargador de arranque GRUB
+# Instalar el sistema base y generar el archivo fstab
+echo "Instalando el sistema base..."
 pacstrap /mnt base linux linux-firmware
-pacstrap /mnt grub
-
-# Generar fstab
 genfstab -U /mnt >> /mnt/etc/fstab
 
-# Configuración del cargador de arranque GRUB
-arch-chroot /mnt grub-install --recheck ${DISK}
-arch-chroot /mnt grub-mkconfig -o /boot/grub/grub.cfg
+# Copiar el script de postinstalación al sistema instalado
+cp postinstall.sh /mnt
 
-# Configuración del nombre de host
-echo "Arch_Ayoub" > /mnt/etc/hostname
-
-# Configuración de la contraseña de root
-echo "root:at15Passw0rd" | arch-chroot /mnt chpasswd
-
-# Configuración de la cuenta de usuario
-arch-chroot /mnt useradd -m -G wheel -s /bin/bash Ayoub
-echo "Ayoub:at15Passw0rd" | arch-chroot /mnt chpasswd
-echo "%wheel ALL=(ALL) ALL" >> /mnt/etc/sudoers
-
-# Desmontar particiones
-umount -R /mnt
-swapoff ${DISK}2
-
-# Mostrar mensaje de advertencia
-echo "¡Instalación completada! Recuerde retirar el disco o USB antes de encender el sistema."
-
+# Chroot al sistema instalado y ejecutar el script de postinstalación
+echo "Chroot al sistema instalado y ejecutando el script de postinstalación..."
+arch-chroot /mnt /bin/bash -c "/postinstall.sh"
