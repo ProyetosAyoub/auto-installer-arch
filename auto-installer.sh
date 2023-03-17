@@ -1,36 +1,36 @@
 #!/bin/bash
-#!/bin/bash
 
 # Set up the disk
 echo "Enter the disk to install Arch Linux to (e.g. /dev/sda):"
 read disk
 
-sgdisk -Z ${disk}
-sgdisk -og ${disk}
-sgdisk -n 1:0:+512M -t 1:ef00 -c 1:"EFI System Partition" ${disk}
+fdisk ${disk} << EOF
+o
+n
+p
+1
 
-echo "Enter the size for the root partition (e.g. 30G):"
-read root_size
++512M
+a
+1
+n
+p
+2
 
-sgdisk -n 2:0:+${root_size} -t 2:8300 -c 2:"Root Partition" ${disk}
 
-echo "Enter the size for the swap partition (e.g. 4G):"
-read swap_size
-
-sgdisk -n 3:0:+${swap_size} -t 3:8200 -c 3:"Swap Partition" ${disk}
-
-sgdisk -p ${disk}
+t
+2
+82
+w
+EOF
 
 # Format the partitions
-mkfs.fat -F32 ${disk}1
 mkfs.ext4 ${disk}2
-mkswap ${disk}3
+mkswap ${disk}1
 
 # Mount the partitions
+swapon ${disk}1
 mount ${disk}2 /mnt
-mkdir /mnt/boot
-mount ${disk}1 /mnt/boot
-swapon ${disk}3
 
 # Install Arch Linux
 pacstrap /mnt base base-devel linux linux-firmware
@@ -61,9 +61,9 @@ echo "Set the root password:"
 passwd
 
 # Install and configure the bootloader
-pacman -S grub efibootmgr
+pacman -S grub
 
-grub-install --target=x86_64-efi --efi-directory=/boot --bootloader-id=arch_grub --recheck
+grub-install --recheck ${disk}
 
 sed -i 's/^GRUB_TIMEOUT=5/GRUB_TIMEOUT=0/' /etc/default/grub
 grub-mkconfig -o /boot/grub/grub.cfg
