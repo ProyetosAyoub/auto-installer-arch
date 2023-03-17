@@ -6,11 +6,6 @@ if [[ $(id -u) -ne 0 ]]; then
     exit 1
 fi
 
-if [[ ! -d /sys/firmware/efi/efivars ]]; then
-    echo "Este script solo se puede ejecutar en sistemas BIOS"
-    exit 1
-fi
-
 # Preguntar al usuario la cantidad de almacenamiento que se debe utilizar para la partición raíz
 read -p "Introduzca la cantidad de almacenamiento que desea para la partición raíz (/) (ejemplo: 30G, 1T): " ROOT_SIZE
 
