@@ -7,11 +7,6 @@ loadkeys es
 EDITOR=nano
 export EDITOR
 
-# Automatic configure mirrorlist
-sudo pacman -S reflector
-sudo cp /etc/pacman.d/mirrorlist /etc/pacman.d/mirrorlist.bak
-sudo reflector --latest 10 --protocol https --sort rate --save /etc/pacman.d/mirrorlist
-
 # Create partition
 fdisk /dev/sda <<EOF
 o
