@@ -8,8 +8,9 @@ EDITOR=nano
 export EDITOR
 
 # Automatic configure mirrorlist
-pacman -Sy --noconfirm reflector
-reflector --latest 200 --protocol http --protocol https --sort rate --save /etc/pacman.d/mirrorlist
+sudo pacman -S reflector
+sudo cp /etc/pacman.d/mirrorlist /etc/pacman.d/mirrorlist.bak
+sudo reflector --latest 10 --protocol https --sort rate --save /etc/pacman.d/mirrorlist
 
 # Create partition
 fdisk /dev/sda <<EOF
