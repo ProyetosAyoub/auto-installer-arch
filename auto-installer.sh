@@ -1,91 +1,63 @@
 #!/bin/bash
 
-# Pedir el disco
-echo "Ingrese el disco a utilizar (ej: /dev/sda):"
-read disk
+# Configure keymap
+loadkeys es
 
-# Crear particiones
-while true; do
-  echo "Ingrese el tamaño para la partición raíz (ej: 20G) (deje en blanco para continuar):"
-  read root_size
-  if [[ -z "$root_size" ]]; then
-    echo "No se ha especificado el tamaño para la partición raíz."
-    exit 1
-  else
-    break
-  fi
-done
+# Select editor
+EDITOR=nano
 
-while true; do
-  echo "Ingrese el tamaño para la partición swap (ej: 2G) (deje en blanco para continuar):"
-  read swap_size
-  if [[ -z "$swap_size" ]]; then
-    echo "No se ha especificado el tamaño para la partición swap."
-    exit 1
-  else
-    break
-  fi
-done
+# Automatic configure mirrorlist
+pacman -Syy
+pacman -S reflector
+reflector --country Spain --age 12 --protocol https --sort rate --save /etc/pacman.d/mirrorlist
 
-fdisk ${disk} << EOF
-o
-n
-p
-1
+# Create partitions
+# En este ejemplo se crearán tres particiones: /dev/sda1 para boot, /dev/sda2 para swap y /dev/sda3 para root
+echo -e "o\nn\np\n1\n\n+500M\nn\np\n2\n\n+2G\nn\np\n3\n\n\nw" | fdisk /dev/sda
 
-+512M
-t
-1
-b
-n
-p
-2
+# Format devices
+mkfs.ext4 /dev/sda1
+mkswap /dev/sda2
+mkfs.ext4 /dev/sda3
 
-+${root_size}
-n
-p
-3
-
-+${swap_size}
-t
-3
-82
-w
-EOF
-
-# Formatear particiones
-mkfs.ext2 ${disk}1
-mkfs.ext4 ${disk}3
-mkswap ${disk}2
-
-# Montar particiones
-mount ${disk}3 /mnt
+# Install system base
+mount /dev/sda3 /mnt
 mkdir /mnt/boot
-mount ${disk}1 /mnt/boot
-swapon ${disk}2
+mount /dev/sda1 /mnt/boot
+swapon /dev/sda2
+pacstrap /mnt base linux linux-firmware
 
-# Instalar Arch Linux
-pacstrap /mnt base base-devel linux linux-firmware
-
-# Generar fstab
+# Configure fstab
 genfstab -U /mnt >> /mnt/etc/fstab
 
-# Crear el directorio para el root
-mkdir /mnt/root
+# Configure hostname
+echo "myhostname" > /mnt/etc/hostname
 
-# Configuración del sistema
-# ...
+# Configure timezone
+arch-chroot /mnt ln -sf /usr/share/zoneinfo/Europe/Madrid /etc/localtime
+arch-chroot /mnt hwclock --systohc
 
-# Instalar y configurar el bootloader
-pacman -S grub
+# Configure locale
+echo "es_ES.UTF-8 UTF-8" > /mnt/etc/locale.gen
+arch-chroot /mnt locale-gen
+echo "LANG=es_ES.UTF-8" > /mnt/etc/locale.conf
 
-grub-install --target=i386-pc --recheck ${disk}
+# Configure mkinitcpio
+arch-chroot /mnt mkinitcpio -P
 
-sed -i 's/^GRUB_TIMEOUT=5/GRUB_TIMEOUT=0/' /mnt/etc/default/grub
-grub-mkconfig -o /mnt/boot/grub/grub.cfg
+# Install/Configure bootloader
+arch-chroot /mnt pacman -S grub
+arch-chroot /mnt grub-install /dev/sda
+arch-chroot /mnt grub-mkconfig -o /boot/grub/grub.cfg
 
-# Salir de chroot y desmontar particiones
-umount -R /mnt
-swapoff -a
+# Configure mirrorlist
+cp /etc/pacman.d/mirrorlist /mnt/etc/pacman.d/mirrorlist
 
-echo "La instalación de Arch Linux se ha completado. Puede reiniciar el sistema y retirar el medio de instalación."
+# Configure root password
+arch-chroot /mnt passwd
+
+echo "¡La instalación de Arch Linux ha finalizado con éxito!
+Faltan por instalar los siguientes componentes:
+- Entorno gráfico
+- Gestor de inicio (por ejemplo, LightDM)
+- Drivers de hardware específicos (por ejemplo, drivers de tarjeta gráfica o de red)" 
