@@ -1,31 +1,49 @@
 #!/bin/bash
 
-# Configure keymap
+# Configure Keymap
 loadkeys es
 
-# Select editor
+# Select Editor
 EDITOR=nano
+export EDITOR
 
 # Automatic configure mirrorlist
-pacman -Syy
-pacman -S reflector
-reflector --country Spain --age 12 --protocol https --sort rate --save /etc/pacman.d/mirrorlist
+pacman -Sy --noconfirm reflector
+reflector --latest 200 --protocol http --protocol https --sort rate --save /etc/pacman.d/mirrorlist
 
-# Create partitions
-# En este ejemplo se crearán tres particiones: /dev/sda1 para boot, /dev/sda2 para swap y /dev/sda3 para root
-echo -e "o\nn\np\n1\n\n+500M\nn\np\n2\n\n+2G\nn\np\n3\n\n\nw" | fdisk /dev/sda
+# Create partition
+fdisk /dev/sda <<EOF
+o
+n
+p
+1
 
-# Format devices
++1G
+n
+p
+2
+
++2G
+n
+p
+3
+
+
+t
+2
+82
+w
+EOF
+
+# Format device
 mkfs.ext4 /dev/sda1
-mkswap /dev/sda2
 mkfs.ext4 /dev/sda3
+mkswap /dev/sda2
+swapon /dev/sda2
 
 # Install system base
-mount /dev/sda3 /mnt
-mkdir /mnt/boot
-mount /dev/sda1 /mnt/boot
-swapon /dev/sda2
-pacstrap /mnt base linux linux-firmware
+mount /dev/sda1 /mnt
+pacstrap /mnt base base-devel linux linux-firmware
 
 # Configure fstab
 genfstab -U /mnt >> /mnt/etc/fstab
@@ -34,30 +52,36 @@ genfstab -U /mnt >> /mnt/etc/fstab
 echo "myhostname" > /mnt/etc/hostname
 
 # Configure timezone
-arch-chroot /mnt ln -sf /usr/share/zoneinfo/Europe/Madrid /etc/localtime
-arch-chroot /mnt hwclock --systohc
+ln -sf /usr/share/zoneinfo/America/New_York /mnt/etc/localtime
+
+# Configure hardware clock
+hwclock --systohc --utc
 
 # Configure locale
-echo "es_ES.UTF-8 UTF-8" > /mnt/etc/locale.gen
+echo "en_US.UTF-8 UTF-8" > /mnt/etc/locale.gen
+echo "LANG=en_US.UTF-8" > /mnt/etc/locale.conf
 arch-chroot /mnt locale-gen
-echo "LANG=es_ES.UTF-8" > /mnt/etc/locale.conf
 
 # Configure mkinitcpio
-arch-chroot /mnt mkinitcpio -P
+arch-chroot /mnt mkinitcpio -p linux
 
 # Install/Configure bootloader
-arch-chroot /mnt pacman -S grub
+arch-chroot /mnt pacman -S --noconfirm grub
 arch-chroot /mnt grub-install /dev/sda
 arch-chroot /mnt grub-mkconfig -o /boot/grub/grub.cfg
 
 # Configure mirrorlist
-cp /etc/pacman.d/mirrorlist /mnt/etc/pacman.d/mirrorlist
+arch-chroot /mnt pacman -Sy --noconfirm reflector
+arch-chroot /mnt reflector --latest 200 --protocol http --protocol https --sort rate --save /etc/pacman.d/mirrorlist
 
 # Configure root password
 arch-chroot /mnt passwd
 
-echo "¡La instalación de Arch Linux ha finalizado con éxito!
-Faltan por instalar los siguientes componentes:
-- Entorno gráfico
-- Gestor de inicio (por ejemplo, LightDM)
-- Drivers de hardware específicos (por ejemplo, drivers de tarjeta gráfica o de red)" 
+# Install Desktop Environment and Display Manager (for example, Xfce and LightDM)
+arch-chroot /mnt pacman -S --noconfirm xorg-server xfce4 lightdm lightdm-gtk-greeter
+
+# Install Hardware Specific Drivers (for example, Nvidia graphics card drivers)
+arch-chroot /mnt pacman -S --noconfirm nvidia nvidia-utils
+
+# Print a message with remaining steps
+echo "Installation complete. You may need to manually configure some additional settings depending on your system hardware and preferences, such as network configuration, sound settings, etc." 
