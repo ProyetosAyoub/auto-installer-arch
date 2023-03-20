@@ -685,7 +685,7 @@ echo ""
 echo "Apóyame en Patreon: "
 echo "https://www.patreon.com/codigocristo"
 sleep 5
-
+shutdown
 
 
 
