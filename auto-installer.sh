@@ -74,6 +74,12 @@ echo "ayoub ALL=(ALL) ALL" >> /etc/sudoers
 # Configurar la contraseña del usuario
 passwd ayoub
 
+#Indicamos el kernel de carga inicial
+mkinitcpio -p linux
+
+#NetworkManager instalacion
+pacman -S networkmanager
+systemctl enable NetwworkManager
 echo "Ya casi esta hecho la instalacion"
 
 
