@@ -31,27 +31,35 @@ mount /dev/sda3 /mnt/home
 
 echo "Ya estan montaldas las particiones" 
 
-# Instalación del sistema base
-pacstrap /mnt base base-devel linux linux-firmware nano
-
-# Configurar fstab
-genfstab -U /mnt >> /mnt/etc/fstab
-
-# Chroot en el sistema instalado
-arch-chroot /mnt
-
-# Configurar el idioma y la zona horaria
-ln -sf /usr/share/zoneinfo/Europe/Madrid /etc/localtime # Reemplaza "Europe/Madrid" con tu zona horaria
+# Configurar la zona horaria
+ln -sf /usr/share/zoneinfo/Europe/Madrid /etc/localtime
 hwclock --systohc
-nano /etc/locale.gen # Descomenta la línea que corresponde a tu idioma y país
+
+# Configurar el idioma
+echo "es_ES.UTF-8 UTF-8" >> /etc/locale.gen
 locale-gen
-echo "LANG=es_ES.UTF-8" > /etc/locale.conf # Reemplaza "es_ES.UTF-8" con tu idioma y país
+echo "LANG=es_ES.UTF-8" >> /etc/locale.conf
 
-# Configurar la red
-echo "archlinux" > /etc/hostname # Reemplaza "archlinux" con el nombre de tu sistema
-nano /etc/hosts # Agrega "127.0.0.1  localhost.localdomain  localhost  archlinux" al archivo hosts
+# Configurar el nombre del equipo
+echo "arch-ayoub" >> /etc/hostname
 
-# Instalación de GRUB
+# Configurar el archivo hosts
+echo "127.0.0.1 localhost" >> /etc/hosts
+echo "::1       localhost" >> /etc/hosts
+echo "127.0.1.1 archayoub.localdomain archayoub" >> /etc/hosts
+
+# Configurar la contraseña del root
+passwd
+
+# Crear un usuario y otorgarle permisos de sudo
+useradd -m -g users -G wheel -s /bin/bash ayoub
+
+# Configurar la contraseña del usuario
+passwd ayoub
+
+echo "ayoub ALL=(ALL) ALL" >> /etc/sudoers
+
+# Instalar el cargador de arranque
 pacman -S grub
 grub-install --target=i386-pc --boot-directory=/mnt/boot /dev/sda
 sed -i 's|GRUB_CMDLINE_LINUX_DEFAULT=".*"|GRUB_CMDLINE_LINUX_DEFAULT="loglevel=3 quiet"|' /etc/default/grub
@@ -60,10 +68,14 @@ grub-mkconfig -o /boot/grub/grub.cfg
 # Instalación del kernel
 pacman -S linux
 
-# Crear usuario y contraseña
-useradd -m -G wheel -s /bin/bash username # Reemplaza "username" con el nombre de usuario que desees
-passwd username # Establece la contraseña del usuario
-EDITOR=nano visudo # Descomenta la línea que permite a los usuarios del grupo wheel utilizar sudo
+#Indicamos el kernel de carga inicial
+mkinitcpio -p linux
+
+# Configurar la contraseña del root
+passwd
+
+# Configurar la contraseña del usuario
+passwd ayoub
 
 # Salir de chroot, desmontar las particiones y reiniciar
 exit
