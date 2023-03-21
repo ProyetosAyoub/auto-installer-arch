@@ -1,77 +1,76 @@
 #!/bin/bash
 
-echo "¡Bienvenido al script de instalación de Arch Linux!"
+# Mostrar mensaje de bienvenida
+echo "Bienvenido al script de instalación de Arch Linux"
 
-# Preguntar si se desean eliminar particiones antiguas
-echo "¿Desea eliminar particiones antiguas? (s/n)"
-read answer
-if [ "$answer" == "s" ]
-then
-  echo "Eliminando particiones antiguas..."
-  wipefs -af /dev/sda
+# Preguntar al usuario si desea eliminar las particiones previas
+echo "¿Desea eliminar las particiones previas? (s/n)"
+read eliminar_particiones_previas
+
+if [[ $eliminar_particiones_previas == "s" ]]; then
+  # Eliminar las particiones previas
+  echo "Eliminando las particiones previas"
+  umount -R /mnt
+  wipefs -a /dev/sda
+  echo "Particiones previas eliminadas"
 fi
 
-# Preguntar por las particiones necesarias
-echo "A continuación, deberá ingresar los datos para las particiones necesarias."
-echo "Recuerde que el tamaño de la partición de boot será de 1G, la de swap será de 2G, y la de raíz será el resto del almacenamiento."
-echo "Ingrese el nombre del disco en el que desea crear las particiones (ej. /dev/sda): "
-read disk
+# Mostrar las particiones actuales
+echo "Particiones actuales:"
+lsblk
 
-echo "Creando partición para boot..."
-echo "n
-p
-1
+# Preguntar por la partición root
+echo "Ingrese la partición para el sistema raíz (/):"
+read particion_root
 
-+1G
-w" | fdisk $disk
+# Validar la partición root
+while ! [[ -e $particion_root ]]; do
+  echo "La partición ingresada no existe. Ingrese una partición válida:"
+  read particion_root
+done
 
-parted $disk set 1 boot on
+# Preguntar por la partición de intercambio (swap)
+echo "Ingrese la partición para la memoria de intercambio (swap):"
+read particion_swap
 
-echo "Creando partición para swap..."
-echo "n
-p
-2
+# Validar la partición de intercambio (swap)
+while ! [[ -e $particion_swap ]]; do
+  echo "La partición ingresada no existe. Ingrese una partición válida:"
+  read particion_swap
+done
 
-+2G
-t
-2
-82
-w" | fdisk $disk
+# Formatear las particiones
+echo "Formateando particiones"
+mkfs.ext4 $particion_root
+mkswap $particion_swap
+swapon $particion_swap
+echo "Particiones formateadas"
 
-echo "Creando partición para raíz..."
-echo "n
-p
-3
+# Montar la partición root
+echo "Montando partición root"
+mount $particion_root /mnt
+echo "Partición root montada"
 
+# Instalar el sistema base
+echo "Instalando sistema base"
+pacstrap /mnt base base-devel
+echo "Sistema base instalado"
 
-w" | fdisk $disk
+# Generar el archivo fstab
+echo "Generando archivo fstab"
+genfstab -U /mnt >> /mnt/etc/fstab
+echo "Archivo fstab generado"
 
-# Formatear particiones
-mkfs.ext4 ${disk}1
-mkswap ${disk}2
-swapon ${disk}2
-mkfs.ext4 ${disk}3
+# Copiar el script post-instalación
+echo "Copiando el script post-instalación"
+cp postinstall.sh /mnt
+echo "Script post-instalación copiado"
 
-# Montar particiones
-mount ${disk}3 /mnt
-mkdir /mnt/boot /mnt/var /mnt/home
-mount ${disk}1 /mnt/boot
+# Cambiar al sistema instalado
+echo "Cambie al nuevo sistema usando 'arch-chroot /mnt' y ejecute el script post-instalación después de eso."
+echo "¿Desea reiniciar el sistema ahora? (s/n)"
+read reiniciar
 
-# Instalar sistema base y network manager
-pacstrap /mnt base linux linux-firmware networkmanager base-devel
-pacstrap /mnt grub-bios
-genfstab -p /mnt >> /mnt/etc/fstab
-
-# Configurar el bootloader
-arch-chroot /mnt /bin/bash -c "pacman -S grub-install /dev/sda && grub-mkconfig -o /boot/grub/grub.cfg && mkinitcpio -p linux && pacman -S networkmanager && system enable Networkmanager"
-
-umount /mnt/boot
-umount /mnt
-
-# Preguntar si se desea reiniciar
-echo "La instalación ha finalizado. ¿Desea reiniciar el sistema? (s/n)"
-read answer
-if [ "$answer" == "s" ]
-then
+if [[ $reiniciar == "s" ]]; then
   reboot
 fi
