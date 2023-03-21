@@ -80,6 +80,11 @@ mkinitcpio -p linux
 #NetworkManager instalacion
 pacman -S networkmanager
 systemctl enable NetworkManager
+
+pacman -S sudo
+
+umount /mnt/boot
+umount /mnt
 echo "Ya casi esta hecho la instalacion"
 
 
