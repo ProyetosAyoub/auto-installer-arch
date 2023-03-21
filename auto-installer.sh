@@ -72,9 +72,9 @@ echo "ayoub ALL=(ALL) ALL" >> /etc/sudoers
 
 # Instalar el cargador de arranque
 pacman -S grub
-grub-install --root-directory=/mnt /dev/sda
+grub-install --target=i386-pc --boot-directory=/mnt/boot /dev/sda
 sed -i 's|GRUB_CMDLINE_LINUX_DEFAULT=".*"|GRUB_CMDLINE_LINUX_DEFAULT="loglevel=3 quiet"|' /etc/default/grub
-grub-mkconfig -o /boot/grub/grub.cf
+grub-mkconfig -o /boot/grub/grub.cfg
 
 #Indicamos el kernel de carga inicial
 mkinitcpio -p linux
