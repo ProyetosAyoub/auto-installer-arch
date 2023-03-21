@@ -40,8 +40,10 @@ genfstab -p /mnt >> /mnt/etc/fstab
 
 #Accederemos a la ruta montada
 
+echo "Ya estas dentro y no hubo ningun problema de momento...."
+
 arch-chroot /mnt /bin/bash
 
-echo "Ya estas dentro y no hubo ningun problema de momento...."
+
 
 
