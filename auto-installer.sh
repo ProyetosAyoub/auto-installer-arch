@@ -42,4 +42,6 @@ genfstab -p /mnt >> /mnt/etc/fstab
 
 arch-chroot /mnt /bin/bash
 
+echo "Ya estas dentro y no hubo ningun problema de momento...."
+
 
