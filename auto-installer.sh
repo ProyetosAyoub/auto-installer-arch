@@ -72,7 +72,7 @@ echo "ayoub ALL=(ALL) ALL" >> /etc/sudoers
 
 # Instalar el cargador de arranque
 pacman -S grub
-grub-install --target=i386-pc /dev/sda
+grub-install --root-directory=/mnt /dev/sda
 sed -i 's|GRUB_CMDLINE_LINUX_DEFAULT=".*"|GRUB_CMDLINE_LINUX_DEFAULT="loglevel=3 quiet"|' /etc/default/grub
 grub-mkconfig -o /boot/grub/grub.cf
 
