@@ -9,18 +9,27 @@ wifi-menu # Si estás conectado a una red inalámbrica
 # Actualizar la hora del sistema
 timedatectl set-ntp true
 
-# Particionado del disco duro
-cfdisk /dev/sda # Configura las particiones según tus necesidades
+# Crear partición para boot de 1GB
+echo -e "n\np\n1\n\n+1G\nw" | fdisk /dev/sda
+mkfs.ext4 /dev/sda1
+parted /dev/sda set 1 boot on
+# Crear partición para swap de 2GB
+echo -e "n\np\n2\n\n+2G\nw" | fdisk /dev/sda
+mkswap /dev/sda2
+swapon /dev/sda2
 
-# Formatear particiones
-mkfs.ext4 /dev/sda1 # Formatea la partición /boot
-mkfs.ext4 /dev/sda3 # Formatea la partición /
-mkswap /dev/sda2 # Formatea la partición de intercambio
-swapon /dev/sda2 # Activa la partición de intercambio
+# Crear partición para home con el resto del espacio disponible
+echo -e "n\np\n3\n\n\nw" | fdisk /dev/sda
+mkfs.ext4 /dev/sda3
 
 # Montar particiones
-mount /dev/sda3 /mnt # Monta la partición /
-mkdir /mnt/boot && mount /dev/sda1 /mnt/boot # Monta la partición /boot
+mount /dev/sda3 /mnt
+mkdir /mnt/boot /mnt/var
+mount /dev/sda1 /mnt/boot
+mkdir /mnt/home
+mount /dev/sda3 /mnt/home
+
+echo "Ya estan montaldas las particiones" 
 
 # Instalación del sistema base
 pacstrap /mnt base base-devel linux linux-firmware nano
