@@ -30,3 +30,16 @@ mkdir /mnt/home
 mount /dev/sda3 /mnt/home
 
 echo "Ya estan montaldas las particiones"
+
+#Instalamos el sistema
+
+pacstrap /mnt base linux linux-firmware base-devel
+pacman -Sy archlinux-keyring
+pacstrap /mnt grub-bios
+genfstab -p /mnt >> /mnt/etc/fstab
+
+#Accederemos a la ruta montada
+
+arch-chroot /mnt /bin/bash
+
+
