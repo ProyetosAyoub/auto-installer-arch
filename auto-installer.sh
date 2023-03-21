@@ -71,6 +71,7 @@ passwd ayoub
 echo "ayoub ALL=(ALL) ALL" >> /etc/sudoers
 
 # Instalar el cargador de arranque
+pacman -S grub
 grub-install /dev/sda
 grub-mkconfig -o /boot/grub/grub.cfg
 
