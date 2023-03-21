@@ -29,4 +29,4 @@ mount /dev/sda1 /mnt/boot
 mkdir /mnt/home
 mount /dev/sda4 /mnt/home
 
-
+echo "Ya estan montaldas las particiones"
