@@ -54,7 +54,7 @@ mkfs.ext4 ${disk}3
 
 # Montar particiones
 mount ${disk}3 /mnt
-mkdir /mnt/boot
+mkdir /mnt/boot /mnt/var /mnt/home
 mount ${disk}1 /mnt/boot
 
 # Instalar sistema base y network manager
