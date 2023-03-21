@@ -61,6 +61,21 @@ echo "127.0.0.1 localhost" >> /etc/hosts
 echo "::1       localhost" >> /etc/hosts
 echo "127.0.1.1 hostname.localdomain hostname" >> /etc/hosts
 
+# Configurar la contraseña del root
+passwd
+
+# Instalar el cargador de arranque
+pacman -S grub
+grub-install /dev/sda
+grub-mkconfig -o /boot/grub/grub.cfg
+
+# Crear un usuario y otorgarle permisos de sudo
+useradd -m -G wheel -s /bin/bash username
+echo "username ALL=(ALL) ALL" >> /etc/sudoers
+
+# Configurar la contraseña del usuario
+passwd usernam
+
 
 
 
