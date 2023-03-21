@@ -10,13 +10,13 @@ if [ "$eliminar" == "s" ]; then
 fi
 
 # Pedimos al usuario que introduzca el tamaño en GB para la partición de /boot
-read -p "Introduce el tamaño en GB para la partición /boot: " tamano_boot
+read -p "Introduce el tamaño en GB para la partición /boot: " tamaño_boot
 
 # Pedimos al usuario que introduzca el tamaño en GB para la partición de swap
-read -p "Introduce el tamaño en GB para la partición swap: " tamano_swap
+read -p "Introduce el tamaño en GB para la partición swap: " tamaño_swap
 
 # Pedimos al usuario que introduzca el tamaño en GB para la partición de root
-read -p "Introduce el tamaño en GB para la partición root: " tamano_root
+read -p "Introduce el tamaño en GB para la partición root: " tamaño_root
 
 # Creamos partición para /boot
 parted --script /dev/sda \
