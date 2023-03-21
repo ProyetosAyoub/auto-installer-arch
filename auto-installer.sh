@@ -85,7 +85,7 @@ pacman -S sudo
 
 umount /mnt/boot
 umount /mnt
-echo "Ya casi esta hecho la instalacion"
+echo "Ya esta lista la instalacion a disfrutar!"
 
 
 
