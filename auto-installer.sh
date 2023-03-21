@@ -18,22 +18,18 @@ echo -e "n\np\n2\n\n+2G\nw" | fdisk /dev/sda
 mkswap /dev/sda2
 swapon /dev/sda2
 
-# Crear partición para root de 100GB
-echo -e "n\np\n3\n\n+100G\nw" | fdisk /dev/sda
-mkfs.ext4 /dev/sda3
-
 # Crear partición para home con el resto del espacio disponible
-echo -e "n\np\n4\n\n\nw" | fdisk /dev/sda
-mkfs.ext4 /dev/sda4
+echo -e "n\np\n3\n\n\nw" | fdisk /dev/sda
+mkfs.ext4 /dev/sda3
 
 # Montar particiones
 mount /dev/sda3 /mnt
-mkdir /mnt/boot
+mkdir /mnt/boot /mnt/var /mnt/home
 mount /dev/sda1 /mnt/boot
 mkdir /mnt/home
 mount /dev/sda4 /mnt/home
 
-# Actualizar el archivo fstab
+/*# Actualizar el archivo fstab
 genfstab -U /mnt >> /mnt/etc/fstab
 
 # Configurar el idioma para España
@@ -71,4 +67,4 @@ umount -R /mnt
 rmdir /mnt/boot
 rmdir /mnt/home
 
-echo "La instalación ha finalizado con éxito"
+echo "La instalación ha finalizado con éxito"*7
