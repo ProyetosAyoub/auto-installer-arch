@@ -42,8 +42,6 @@ genfstab -p /mnt >> /mnt/etc/fstab
 
 echo "Ya estas dentro y no hubo ningun problema de momento...."
 
-arch-chroot /mnt
-
 # Configurar la zona horaria
 ln -sf /usr/share/zoneinfo/Europe/Madrid /etc/localtime
 hwclock --systohc
