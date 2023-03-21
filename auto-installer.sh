@@ -12,7 +12,7 @@ lsblk
 # Crear partición para boot de 1GB
 echo -e "n\np\n1\n\n+1G\nw" | fdisk /dev/sda
 mkfs.ext4 /dev/sda1
-parted /dev/sda1 set 1 boot on
+parted /dev/sda set 1 boot on
 # Crear partición para swap de 2GB
 echo -e "n\np\n2\n\n+2G\nw" | fdisk /dev/sda
 mkswap /dev/sda2
