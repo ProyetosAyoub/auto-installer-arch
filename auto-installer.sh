@@ -68,7 +68,7 @@ grub-install /dev/sda
 grub-mkconfig -o /boot/grub/grub.cfg
 
 # Crear un usuario y otorgarle permisos de sudo
-useradd -m -G wheel -s /bin/bash ayoub
+useradd -m -g users -G wheel -s /bin/bash ayoub
 echo "ayoub ALL=(ALL) ALL" >> /etc/sudoers
 
 # Configurar la contraseña del usuario
@@ -79,7 +79,7 @@ mkinitcpio -p linux
 
 #NetworkManager instalacion
 pacman -S networkmanager
-systemctl enable NetwworkManager
+systemctl enable NetworkManager
 echo "Ya casi esta hecho la instalacion"
 
 
