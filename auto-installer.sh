@@ -72,7 +72,7 @@ useradd -m -G wheel -s /bin/bash ayoub
 echo "ayoub ALL=(ALL) ALL" >> /etc/sudoers
 
 # Configurar la contraseña del usuario
-passwd username
+passwd ayoub
 
 echo "Ya casi esta hecho la instalacion"
 
