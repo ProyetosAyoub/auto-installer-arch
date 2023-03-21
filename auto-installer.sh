@@ -1,13 +1,13 @@
 #!/bin/bash
 
-# Configuración del teclado
+# Verificar la conexión a Internet
+ping -c 3 google.com
+
+# Configurar la distribución de teclado para España
 loadkeys es
 
-# Conexión a Internet
-wifi-menu # Si estás conectado a una red inalámbrica
-
-# Actualizar la hora del sistema
-timedatectl set-ntp true
+# Verificar si la unidad de disco es la correcta (/dev/sda en este caso)
+lsblk
 
 # Crear partición para boot de 1GB
 echo -e "n\np\n1\n\n+1G\nw" | fdisk /dev/sda
@@ -29,7 +29,18 @@ mount /dev/sda1 /mnt/boot
 mkdir /mnt/home
 mount /dev/sda3 /mnt/home
 
-echo "Ya estan montaldas las particiones" 
+echo "Ya estan montaldas las particiones"
+
+#Instalamos el sistema
+
+pacstrap /mnt base linux linux-firmware base-devel
+pacman -Sy archlinux-keyring
+pacstrap /mnt grub-bios
+genfstab -p /mnt >> /mnt/etc/fstab
+
+#Accederemos a la ruta montada
+
+echo "Ya estas dentro y no hubo ningun problema de momento...."
 
 # Configurar la zona horaria
 ln -sf /usr/share/zoneinfo/Europe/Madrid /etc/localtime
@@ -65,19 +76,14 @@ grub-install --target=i386-pc --boot-directory=/mnt/boot /dev/sda
 sed -i 's|GRUB_CMDLINE_LINUX_DEFAULT=".*"|GRUB_CMDLINE_LINUX_DEFAULT="loglevel=3 quiet"|' /etc/default/grub
 grub-mkconfig -o /boot/grub/grub.cfg
 
-# Instalación del kernel
-pacman -S linux
-
 #Indicamos el kernel de carga inicial
 mkinitcpio -p linux
 
-# Configurar la contraseña del root
-passwd
+#NetworkManager instalacion
+pacman -S networkmanager
+systemctl enable NetworkManager
 
-# Configurar la contraseña del usuario
-passwd ayoub
+umount /mnt/boot
+umount /mnt
 
-# Salir de chroot, desmontar las particiones y reiniciar
-exit
-umount -R /mnt
-
+echo "Ya esta lista la instalacion a disfrutar!"
