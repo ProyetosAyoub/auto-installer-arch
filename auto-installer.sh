@@ -62,17 +62,17 @@ echo "127.0.1.1 archayoub.localdomain archayoub" >> /etc/hosts
 # Configurar la contraseña del root
 passwd
 
-# Instalar el cargador de arranque
-pacman -S grub
-grub-install /dev/sda
-grub-mkconfig -o /boot/grub/grub.cfg
-
 # Crear un usuario y otorgarle permisos de sudo
 useradd -m -g users -G wheel -s /bin/bash ayoub
-echo "ayoub ALL=(ALL) ALL" >> /etc/sudoers
 
 # Configurar la contraseña del usuario
 passwd ayoub
+
+echo "ayoub ALL=(ALL) ALL" >> /etc/sudoers
+
+# Instalar el cargador de arranque
+grub-install /dev/sda
+grub-mkconfig -o /boot/grub/grub.cfg
 
 #Indicamos el kernel de carga inicial
 mkinitcpio -p linux
@@ -81,10 +81,6 @@ mkinitcpio -p linux
 pacman -S networkmanager
 systemctl enable NetworkManager
 
-pacman -S sudo
-
-umount /mnt/boot
-umount /mnt
 echo "Ya esta lista la instalacion a disfrutar!"
 
 
