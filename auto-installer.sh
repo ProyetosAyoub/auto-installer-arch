@@ -29,42 +29,4 @@ mount /dev/sda1 /mnt/boot
 mkdir /mnt/home
 mount /dev/sda4 /mnt/home
 
-/*# Actualizar el archivo fstab
-genfstab -U /mnt >> /mnt/etc/fstab
 
-# Configurar el idioma para España
-echo "es_ES.UTF-8 UTF-8" >> /mnt/etc/locale.gen
-arch-chroot /mnt locale-gen
-echo "LANG=es_ES.UTF-8" > /mnt/etc/locale.conf
-
-# Configurar la zona horaria para España
-arch-chroot /mnt ln -sf /usr/share/zoneinfo/Europe/Madrid /etc/localtime
-arch-chroot /mnt hwclock --systohc
-
-# Configurar el nombre del equipo
-echo "myhostname" > /mnt/etc/hostname
-echo "127.0.0.1 localhost" >> /mnt/etc/hosts
-echo "::1 localhost" >> /mnt/etc/hosts
-echo "127.0.1.1 myhostname.localdomain myhostname" >> /mnt/etc/hosts
-
-# Instalar y configurar el gestor de arranque GRUB
-arch-chroot /mnt pacman -S grub
-arch-chroot /mnt grub-install /dev/sda
-arch-chroot /mnt grub-mkconfig -o /boot/grub/grub.cfg
-
-# Configurar el kernel de carga inicial
-echo "default arch" > /mnt/boot/loader/loader.conf
-echo "timeout 3" >> /mnt/boot/loader/loader.conf
-
-# Instalar NetworkManager
-arch-chroot /mnt pacman -S networkmanager
-
-# Habilitar NetworkManager
-arch-chroot /mnt systemctl enable NetworkManager.service
-
-# Salir del arch-chroot y limpiar el sistema
-umount -R /mnt
-rmdir /mnt/boot
-rmdir /mnt/home
-
-echo "La instalación ha finalizado con éxito"*7
