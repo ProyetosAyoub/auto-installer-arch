@@ -5,7 +5,6 @@ loadkeys es
 
 # Conexión a Internet
 wifi-menu # Si estás conectado a una red inalámbrica
-ping archlinux.org # Prueba la conexión a Internet
 
 # Actualizar la hora del sistema
 timedatectl set-ntp true
