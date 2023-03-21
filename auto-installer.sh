@@ -54,12 +54,12 @@ locale-gen
 echo "LANG=es_ES.UTF-8" >> /etc/locale.conf
 
 # Configurar el nombre del equipo
-echo "hostname" >> /etc/hostname
+echo "arch-ayoub" >> /etc/hostname
 
 # Configurar el archivo hosts
 echo "127.0.0.1 localhost" >> /etc/hosts
 echo "::1       localhost" >> /etc/hosts
-echo "127.0.1.1 hostname.localdomain hostname" >> /etc/hosts
+echo "127.0.1.1 archayoub.localdomain archayoub" >> /etc/hosts
 
 # Configurar la contraseña del root
 passwd
@@ -70,12 +70,13 @@ grub-install /dev/sda
 grub-mkconfig -o /boot/grub/grub.cfg
 
 # Crear un usuario y otorgarle permisos de sudo
-useradd -m -G wheel -s /bin/bash username
-echo "username ALL=(ALL) ALL" >> /etc/sudoers
+useradd -m -G wheel -s /bin/bash ayoub
+echo "ayoub ALL=(ALL) ALL" >> /etc/sudoers
 
 # Configurar la contraseña del usuario
-passwd usernam
+passwd username
 
+echo "Ya casi esta hecho la instalacion"
 
 
 
