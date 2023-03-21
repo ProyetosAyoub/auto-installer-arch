@@ -24,9 +24,9 @@ mkfs.ext4 /dev/sda3
 
 # Montar particiones
 mount /dev/sda3 /mnt
-mkdir /mnt/boot /mnt/var /mnt/home
+mkdir /mnt/boot /mnt/var
 mount /dev/sda1 /mnt/boot
 mkdir /mnt/home
-mount /dev/sda4 /mnt/home
+mount /dev/sda3 /mnt/home
 
 echo "Ya estan montaldas las particiones"
