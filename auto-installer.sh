@@ -25,6 +25,8 @@ p
 +1G
 w" | fdisk $disk
 
+parted $disk set 1 boot on
+
 echo "Creando partición para swap..."
 echo "n
 p
