@@ -1,63 +1,77 @@
 #!/bin/bash
 
-# Eliminar particiones existentes
-lsblk
-read -p "¿Desea eliminar las particiones existentes? [s/n]: " DELETE_PARTITIONS
+# Preguntamos al usuario si desea eliminar particiones existentes
+read -p "¿Desea eliminar particiones existentes? (s/n): " eliminar
 
-if [ $DELETE_PARTITIONS = "s" ]; then
-  read -p "Escriba el nombre de la particion del disco (ej. /dev/sda): " DISK
-  umount $DISK*
-  wipefs -a $DISK
-  parted -s $DISK mklabel gpt
+if [ "$eliminar" == "s" ]; then
+    # Eliminamos particiones existentes
+    umount -R /mnt
+    wipefs -a /dev/sda
 fi
 
-# Crear particiones
-parted $DISK mkpart primary ext4 1MiB 512MiB
-parted $DISK set 1 boot on
-parted $DISK mkpart primary ext4 512MiB 100%
+# Pedimos al usuario que introduzca el tamaño en GB para la partición de /boot
+read -p "Introduce el tamaño en GB para la partición /boot: " tamano_boot
 
-# Formatear particiones
-mkfs.ext4 ${DISK}1
-mkfs.ext4 ${DISK}2
+# Pedimos al usuario que introduzca el tamaño en GB para la partición de swap
+read -p "Introduce el tamaño en GB para la partición swap: " tamano_swap
 
-# Montar particiones
-mount ${DISK}2 /mnt
-mkdir /mnt/boot
-mount ${DISK}1 /mnt/boot
+# Pedimos al usuario que introduzca el tamaño en GB para la partición de root
+read -p "Introduce el tamaño en GB para la partición root: " tamano_root
 
-# Instalar el sistema base
-pacstrap /mnt base linux linux-firmware base-devel
+# Creamos partición para /boot
+parted --script /dev/sda \
+    mklabel gpt \
+    mkpart primary ext4 1MiB ${tamano_boot}GiB \
+    set 1 boot on
 
-# Generar fstab
+# Creamos partición para swap
+parted --script /dev/sda \
+    mkpart primary linux-swap ${tamano_boot}GiB ${tamano_swap}GiB
+
+# Creamos partición para root
+parted --script /dev/sda \
+    mkpart primary ext4 ${tamano_swap}GiB ${tamano_swap + tamano_root}GiB
+
+# Formateamos las particiones
+mkfs.ext4 /dev/sda1
+mkswap /dev/sda2
+mkfs.ext4 /dev/sda3
+
+# Activamos swap
+swapon /dev/sda2
+
+# Montamos la partición de root
+mount /dev/sda3 /mnt
+
+# Instalamos el sistema base
+pacstrap /mnt base linux linux-firmware
+
+# Generamos el archivo fstab
 genfstab -U /mnt >> /mnt/etc/fstab
 
-# Chroot en el sistema instalado
-arch-chroot /mnt /bin/bash <<EOF
+# Copiamos el script de post-instalación al sistema que acabamos de instalar
+cp post_installation_script.sh /mnt
 
-# Configurar la zona horaria
-ln -sf /usr/share/zoneinfo/America/Bogota /etc/localtime
-hwclock --systohc
-
-# Configurar el idioma
-echo "es_es.UTF-8 UTF-8" > /etc/locale.gen
-locale-gen
-echo "LANG=es_es.UTF-8" > /etc/locale.conf
-
-# Configurar la red
-echo "archlinux" > /etc/hostname
-echo "127.0.0.1	localhost" >> /etc/hosts
-echo "::1		localhost" >> /etc/hosts
-echo "127.0.1.1	archlinux.localdomain	archlinux" >> /etc/hosts
-
-# Configurar el gestor de arranque
-pacman -S grub efibootmgr
-grub-install --target=x86_64-efi --efi-directory=/boot --bootloader-id=arch_grub --recheck
+# Chroot al sistema que acabamos de instalar
+arch-chroot /mnt /bin/bash << EOF
+# Instalamos y configuramos el bootloader GRUB
+pacman -S grub efibootmgr dosfstools os-prober mtools
+mkdir /boot/efi
+mount /dev/sda1 /boot/efi
+grub-install --target=x86_64-efi --bootloader-id=grub_uefi --recheck
 grub-mkconfig -o /boot/grub/grub.cfg
 
-#!/bin/bash
+# Descargamos y habilitamos el network manager
+pacman -S networkmanager
+systemctl enable NetworkManager
+EOF
 
-read -p "¿Desea reiniciar el sistema? [s/n]: " RESTART
+# Eliminamos el script de post-instalación
+rm /mnt/post_installation_script.sh
 
-if [ $RESTART = "s" ]; then
-  reboot
+# Preguntamos al usuario si desea reiniciar el sistema
+read -p "¿Desea reiniciar el sistema? (s/n): " reiniciar
+
+if [ "$reiniciar" == "s" ]; then
+    reboot
 fi
