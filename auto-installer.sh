@@ -84,6 +84,6 @@ pacman -S networkmanager
 systemctl enable NetworkManager
 
 umount /mnt/boot
-umount /mnt
+umount -R /mnt
 
 echo "Ya esta lista la instalacion a disfrutar!"
