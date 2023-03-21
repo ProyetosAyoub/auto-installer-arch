@@ -42,7 +42,25 @@ genfstab -p /mnt >> /mnt/etc/fstab
 
 echo "Ya estas dentro y no hubo ningun problema de momento...."
 
-arch-chroot /mnt /bin/bash
+arch-chroot /mnt
+
+# Configurar la zona horaria
+ln -sf /usr/share/zoneinfo/Europe/Madrid /etc/localtime
+hwclock --systohc
+
+# Configurar el idioma
+echo "es_ES.UTF-8 UTF-8" >> /etc/locale.gen
+locale-gen
+echo "LANG=es_ES.UTF-8" >> /etc/locale.conf
+
+# Configurar el nombre del equipo
+echo "hostname" >> /etc/hostname
+
+# Configurar el archivo hosts
+echo "127.0.0.1 localhost" >> /etc/hosts
+echo "::1       localhost" >> /etc/hosts
+echo "127.0.1.1 hostname.localdomain hostname" >> /etc/hosts
+
 
 
 
