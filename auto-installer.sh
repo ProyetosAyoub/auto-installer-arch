@@ -45,7 +45,7 @@ p
 w" | fdisk $disk
 
 # Formatear particiones
-mkfs.fat -F32 ${disk}1
+mkfs.ext4 ${disk}1
 mkswap ${disk}2
 swapon ${disk}2
 mkfs.ext4 ${disk}3
@@ -56,11 +56,15 @@ mkdir /mnt/boot
 mount ${disk}1 /mnt/boot
 
 # Instalar sistema base y network manager
-pacstrap /mnt base linux linux-firmware networkmanager
-genfstab -U /mnt >> /mnt/etc/fstab
+pacstrap /mnt base linux linux-firmware networkmanager base-devel
+pacstrap /mnt grub-bios
+genfstab -p /mnt >> /mnt/etc/fstab
 
 # Configurar el bootloader
-arch-chroot /mnt bash -c "pacman -S grub efibootmgr --noconfirm && grub-install --target=x86_64-efi --efi-directory=/boot --bootloader-id=GRUB && grub-mkconfig -o /boot/grub/grub.cfg"
+arch-chroot /mnt /bin/bash -c "pacman -S grub-install /dev/sda && grub-mkconfig -o /boot/grub/grub.cfg && mkinitcpio -p linux && pacman -S networkmanager && system enable Networkmanager"
+
+umount /mnt/boot
+umount /mnt
 
 # Preguntar si se desea reiniciar
 echo "La instalación ha finalizado. ¿Desea reiniciar el sistema? (s/n)"
