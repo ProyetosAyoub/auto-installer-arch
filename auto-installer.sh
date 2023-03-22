@@ -74,11 +74,10 @@ pacstrap /mnt base linux linux-firmware  base-devel
 pacstrap /mnt grub-bios
 genfstab -U /mnt >> /mnt/etc/fstab
 
-arch-chroot /mnt
+arch-chroot /mnt <<eof
 #Accederemos a la ruta montada
 
 echo "Ya estas dentro y no hubo ningun problema de momento...."
-
 
 hwclock -w
 # Configurar el idioma
@@ -115,8 +114,6 @@ echo "ayoub ALL=(ALL) ALL" >> /etc/sudoers
 
 # Instalar el cargador de arranque
 grub-install /dev/sda
-grub-install --target=i386-pc --boot-directory=/mnt/boot /dev/sda
-sed -i 's|GRUB_CMDLINE_LINUX_DEFAULT=".*"|GRUB_CMDLINE_LINUX_DEFAULT="loglevel=3 quiet"|' /etc/default/grub
 grub-mkconfig -o /boot/grub/grub.cfg
 
 nkinitcpio -p linux
@@ -124,6 +121,7 @@ nkinitcpio -p linux
 pacman -S networkmanager
 
 systemctl enable NetworkManager
+eof
 
 umount /mnt/boot
 umount -R /mnt
