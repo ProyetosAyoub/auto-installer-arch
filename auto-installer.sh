@@ -74,7 +74,7 @@ pacstrap /mnt base linux linux-firmware  base-devel
 pacstrap /mnt grub-bios
 genfstab -U /mnt >> /mnt/etc/fstab
 
-arch-chroot /mnt <<eof
+arch-chroot /mnt <<EOF
 #Accederemos a la ruta montada
 
 echo "Ya estas dentro y no hubo ningun problema de momento...."
@@ -121,7 +121,7 @@ nkinitcpio -p linux
 pacman -S networkmanager
 
 systemctl enable NetworkManager
-eof
+EOF
 
 umount /mnt/boot
 umount -R /mnt
