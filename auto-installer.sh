@@ -74,6 +74,7 @@ pacstrap /mnt base linux linux-firmware  base-devel
 pacstrap /mnt grub-bios
 genfstab -U /mnt >> /mnt/etc/fstab
 
+arch-chroot /mnt
 #Accederemos a la ruta montada
 
 echo "Ya estas dentro y no hubo ningun problema de momento...."
