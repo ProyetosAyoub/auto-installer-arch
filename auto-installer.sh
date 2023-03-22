@@ -69,7 +69,7 @@ echo "Ya estan montaldas las particiones"
 
 #Instalamos el sistema
 
-pacman -Sy archlinux-keyring
+pacman -Sy archlinux-keyring --noconfirm
 pacstrap /mnt base linux linux-firmware base-devel
 pacstrap /mnt grub-bios
 genfstab -p /mnt >> /mnt/etc/fstab
@@ -97,7 +97,7 @@ echo "127.0.0.1 localhost" >> /etc/hosts
 echo "::1       localhost" >> /etc/hosts
 echo "127.0.1.1 archayoub.localdomain archayoub" >> /etc/hosts
 
-pacman -S dhcpcd
+pacman -S dhcpcd --noconfirm
 
 systemctl enable dhcpcd.service
 
@@ -118,7 +118,7 @@ grub-mkconfig -o /boot/grub/grub.cfg
 
 mkinitcpio -p linux
 
-pacman -S networkmanager
+pacman -S networkmanager --noconfirm
 
 systemctl enable NetworkManager
 EOF
