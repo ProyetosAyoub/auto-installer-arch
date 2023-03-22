@@ -69,22 +69,25 @@ echo "Ya estan montaldas las particiones"
 
 #Instalamos el sistema
 
-pacstrap /mnt base linux linux-firmware 
-pacman -Sy archlinux-keyring    
+pacman -Sy archlinux-keyring
+pacstrap /mnt base linux linux-firmware  base-devel
+pacstrap /mnt grub-bios
 genfstab -U /mnt >> /mnt/etc/fstab
 
 #Accederemos a la ruta montada
 
 echo "Ya estas dentro y no hubo ningun problema de momento...."
 
-# Configurar la zona horaria
-ln -sf /usr/share/zoneinfo/Europe/Madrid /etc/localtime
+
 hwclock -w
 # Configurar el idioma
 echo KEYMAP=es > /etc/vconsole.conf
 echo "es_ES.UTF-8 UTF-8" >> /etc/locale.gen
 locale-gen
 echo "LANG=es_ES.UTF-8" >> /etc/locale.conf
+
+# Configurar la zona horaria
+ln -sf /usr/share/zoneinfo/Europe/Madrid /etc/localtime
 
 # Configurar el nombre del equipo
 echo "arch-ayoub" >> /etc/hostname
@@ -93,6 +96,13 @@ echo "arch-ayoub" >> /etc/hostname
 echo "127.0.0.1 localhost" >> /etc/hosts
 echo "::1       localhost" >> /etc/hosts
 echo "127.0.1.1 archayoub.localdomain archayoub" >> /etc/hosts
+
+pacman -S dhcpcd
+
+systemctl enable dhcpcd.service
+
+# Configurar la contraseña del root
+passwd
 
 # Crear un usuario y otorgarle permisos de sudo
 useradd -m -g users -G wheel -s /bin/bash ayoub
@@ -103,15 +113,18 @@ passwd ayoub
 echo "ayoub ALL=(ALL) ALL" >> /etc/sudoers
 
 # Instalar el cargador de arranque
-pacstrap /mnt grub-bios
 grub-install /dev/sda
 grub-install --target=i386-pc --boot-directory=/mnt/boot /dev/sda
 sed -i 's|GRUB_CMDLINE_LINUX_DEFAULT=".*"|GRUB_CMDLINE_LINUX_DEFAULT="loglevel=3 quiet"|' /etc/default/grub
 grub-mkconfig -o /boot/grub/grub.cfg
 
-# Configurar la contraseña del root
-passwd
+nkinitcpio -p linux
 
+pacman -S networkmanager
+
+systemctl enable NetWorkManager
+
+umount /mnt/boot
 umount -R /mnt
 
 echo "Ya esta lista la instalacion a disfrutar!"
