@@ -122,7 +122,7 @@ nkinitcpio -p linux
 
 pacman -S networkmanager
 
-systemctl enable NetWorkManager
+systemctl enable NetworkManager
 
 umount /mnt/boot
 umount -R /mnt
