@@ -70,16 +70,16 @@ echo "Ya estan montaldas las particiones"
 #Instalamos el sistema
 
 pacman -Sy archlinux-keyring
-pacstrap /mnt base linux linux-firmware  base-devel
+pacstrap /mnt base linux linux-firmware base-devel
 pacstrap /mnt grub-bios
-genfstab -U /mnt >> /mnt/etc/fstab
+genfstab -p /mnt >> /mnt/etc/fstab
 
-arch-chroot /mnt <<EOF
-#Accederemos a la ruta montada
-
-echo "Ya estas dentro y no hubo ningun problema de momento...."
+arch-chroot /mnt /bin/bash <<EOF
+pacman -S nano --noconfirm
+pacman -S sudo --noconfirm
 
 hwclock -w
+
 # Configurar el idioma
 echo KEYMAP=es > /etc/vconsole.conf
 echo "es_ES.UTF-8 UTF-8" >> /etc/locale.gen
@@ -113,11 +113,10 @@ passwd ayoub
 echo "ayoub ALL=(ALL) ALL" >> /etc/sudoers
 
 # Instalar el cargador de arranque
-pacman -S grub
 grub-install /dev/sda
 grub-mkconfig -o /boot/grub/grub.cfg
 
-nkinitcpio -p linux
+mkinitcpio -p linux
 
 pacman -S networkmanager
 
