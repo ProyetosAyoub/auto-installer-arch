@@ -6,8 +6,39 @@ ping -c 3 google.com
 # Configurar la distribución de teclado para España
 loadkeys es
 
+# Verificar la hora
+timedatectl set-ntp true
+
 # Verificar si la unidad de disco es la correcta (/dev/sda en este caso)
 lsblk
+
+# Solicitar la unidad de disco en la que se realizarán las operaciones
+read -p "Introduce la unidad de disco en la que deseas realizar las operaciones (ejemplo: /dev/sda): " drive
+
+# Listar las particiones existentes en la unidad de disco especificada
+echo "Las siguientes particiones existen en la unidad de disco $drive:"
+fdisk -l $drive
+
+# Solicitar la confirmación del usuario para continuar
+read -p "¿Deseas eliminar todas las particiones en la unidad de disco $drive y eliminar los formatos existentes? (y/n): " confirm
+if [ "$confirm" == "y" ]; then
+    # Eliminar las particiones existentes
+    echo "Eliminando particiones existentes..."
+    parted $drive rm 1 || true
+    parted $drive rm 2 || true
+    parted $drive rm 3 || true
+    parted $drive rm 4 || true
+
+    # Eliminar los formatos existentes
+    echo "Eliminando formatos existentes..."
+    mkfs.ext4 -F $drive1 || true
+    mkswap -f $drive2 || true
+    mkfs.ext4 -F $drive3 || true
+    mkfs.ext4 -F $drive4 || true
+    echo "¡Listo!"
+else
+    echo "Operación cancelada por el usuario."
+fi
 
 # Crear partición para boot de 1GB
 echo -e "n\np\n1\n\n+1G\nw" | fdisk /dev/sda
@@ -38,10 +69,9 @@ echo "Ya estan montaldas las particiones"
 
 #Instalamos el sistema
 
-pacstrap /mnt base linux linux-firmware base-devel nano networkmanager dhcpcd grub
-pacstrap /mnt netctl wpa_supplicant dialog
+pacstrap /mnt base linux linux-firmware 
 pacman -Sy archlinux-keyring    
-genfstab -p /mnt >> /mnt/etc/fstab
+genfstab -U /mnt >> /mnt/etc/fstab
 
 #Accederemos a la ruta montada
 
@@ -73,6 +103,7 @@ passwd ayoub
 echo "ayoub ALL=(ALL) ALL" >> /etc/sudoers
 
 # Instalar el cargador de arranque
+pacstrap /mnt grub-bios
 grub-install /dev/sda
 grub-install --target=i386-pc --boot-directory=/mnt/boot /dev/sda
 sed -i 's|GRUB_CMDLINE_LINUX_DEFAULT=".*"|GRUB_CMDLINE_LINUX_DEFAULT="loglevel=3 quiet"|' /etc/default/grub
@@ -80,12 +111,6 @@ grub-mkconfig -o /boot/grub/grub.cfg
 
 # Configurar la contraseña del root
 passwd
-
-# Crear un usuario y otorgarle permisos de sudo
-useradd -m -g users -G wheel -s /bin/bash ayoub
-
-# Configurar la contraseña del usuario
-passwd ayoub
 
 umount -R /mnt
 
