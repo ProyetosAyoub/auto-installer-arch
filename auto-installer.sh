@@ -42,7 +42,7 @@ fi
 
 # Crear partición para boot de 1GB
 echo -e "n\np\n1\n\n+1G\nw" | fdisk /dev/sda
-mkfs.ext2 /dev/sda1
+mkfs.ext4 /dev/sda1
 parted /dev/sda set 1 boot on
 
 # Crear partición para swap de 2GB
@@ -76,9 +76,8 @@ genfstab -p /mnt >> /mnt/etc/fstab
 
 arch-chroot /mnt /bin/bash <<EOF
 pacman -S nano --noconfirm
-pacman -S sudo --noconfirm
 
-hwclock -w
+hwclock --systohc
 
 # Configurar el idioma
 echo KEYMAP=es > /etc/vconsole.conf
@@ -121,6 +120,8 @@ mkinitcpio -p linux
 pacman -S networkmanager --noconfirm
 
 systemctl enable NetworkManager
+
+pacman -S sudo --noconfirm
 EOF
 
 umount /mnt/boot
