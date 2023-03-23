@@ -78,7 +78,7 @@ pacstrap /mnt grub-bios
 genfstab -p /mnt >> /mnt/etc/fstab
 
 arch-chroot /mnt /bin/bash <<EOF
-pacman -S nano --noconfirm
+pacman -S nano 
 hwclock --systohc
 # Configurar el idioma
 echo KEYMAP=es > /etc/vconsole.conf
@@ -93,20 +93,34 @@ echo "arch-ayoub" >> /etc/hostname
 echo "127.0.0.1 localhost" >> /etc/hosts
 echo "::1       localhost" >> /etc/hosts
 echo "127.0.1.1 archayoub.localdomain archayoub" >> /etc/hosts
-pacman -S dhcpcd --noconfirm
+pacman -S dhcpcd 
 systemctl enable dhcpcd.service
 # Configurar la contraseña del root
-passwd
+while true; do
+  passwd -p
+  if [ $? -eq 0 ]; then
+    break
+  else
+    echo "Las contraseñas no coinciden. Inténtalo de nuevo."
+  fi
+done
 # Crear un usuario y otorgarle permisos de sudo
-useradd -m -g users -G wheel -s /bin/bash ayoub
+useradd -m -g users -G wheel -s /bin/bash $usuario
 # Configurar la contraseña del usuario
-passwd ayoub
-echo "ayoub ALL=(ALL) ALL" >> /etc/sudoers
+while true; do
+  passwd ${usuario} -p
+  if [ $? -eq 0 ]; then
+    break
+  else
+    echo "Las contraseñas no coinciden. Inténtalo de nuevo."
+  fi
+done
+echo "${usuario} ALL=(ALL) ALL" >> /etc/sudoers
 # Instalar el cargador de arranque
 grub-install /dev/sda
 grub-mkconfig -o /boot/grub/grub.cfg
 mkinitcpio -p linux
-pacman -S networkmanager
+pacman -S networkmanager 
 systemctl enable NetworkManager
 pacman -S sudo 
 EOF
