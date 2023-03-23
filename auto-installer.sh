@@ -89,7 +89,7 @@ passwd
 # Solicitar el nombre de usuario
 read -p "Introduce el nombre de usuario que deseas crear: " username
 
-arch-chroot /mnt /bin/bash <<EOF
+arch-chroot /mnt /bin/bash <<-EOF
 pacman -S nano 
 hwclock --systohc
 # Configurar el idioma
