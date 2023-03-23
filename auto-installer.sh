@@ -11,61 +11,64 @@ timedatectl set-ntp true
 
 # Verificar si la unidad de disco es la correcta (/dev/sda en este caso)
 lsblk
+read -p "Introduce el nombre de la unidad de disco en la que deseas realizar las operaciones (ejemplo: sda): " disk_name
+disk="/dev/${disk_name}"
 
-# Solicitar la unidad de disco en la que se realizarán las operaciones
-read -p "Introduce la unidad de disco en la que deseas realizar las operaciones (ejemplo: /dev/sda): " drive
+if ! [[ -b "$disk" ]]; then
+  echo "El nombre de la unidad de disco introducido no es válido."
+  exit 1
+fi
 
 # Listar las particiones existentes en la unidad de disco especificada
-echo "Las siguientes particiones existen en la unidad de disco $drive:"
-fdisk -l $drive
+echo "Las siguientes particiones existen en la unidad de disco $disk:"
+fdisk -l $disk
 
 # Solicitar la confirmación del usuario para continuar
-read -p "¿Deseas eliminar todas las particiones en la unidad de disco $drive y eliminar los formatos existentes? (y/n): " confirm
+read -p "¿Deseas eliminar todas las particiones en la unidad de disco $disk y eliminar los formatos existentes? (y/n): " confirm
 if [ "$confirm" == "y" ]; then
     # Eliminar las particiones existentes
     echo "Eliminando particiones existentes..."
-    parted $drive rm 1 || true
-    parted $drive rm 2 || true
-    parted $drive rm 3 || true
-    parted $drive rm 4 || true
+    for i in $(seq 1 4); do
+        parted $disk rm $i || true
+    done
 
     # Eliminar los formatos existentes
     echo "Eliminando formatos existentes..."
-    mkfs.ext4 -F $drive1 || true
-    mkswap -f $drive2 || true
-    mkfs.ext4 -F $drive3 || true
-    mkfs.ext4 -F $drive4 || true
+    for i in $(seq 1 4); do
+        mkfs.ext4 -F $disk$i || true
+    done
     echo "¡Listo!"
 else
     echo "Operación cancelada por el usuario."
+    exit 1
 fi
 
 # Crear partición para boot de 1GB
-echo -e "n\np\n1\n\n+1G\nw" | fdisk /dev/sda
-mkfs.ext4 /dev/sda1
-parted /dev/sda set 1 boot on
+echo -e "n\np\n1\n\n+1G\nw" | fdisk $disk
+mkfs.ext4 "${disk}1"
+parted $disk set 1 boot on
 
 # Crear partición para swap de 2GB
-echo -e "n\np\n2\n\n+2G\nw" | fdisk /dev/sda
-mkswap /dev/sda2
-swapon /dev/sda2
+echo -e "n\np\n2\n\n+2G\nw" | fdisk $disk
+mkswap "${disk}2"
+swapon "${disk}2"
 
 # Crear partición para raiz de 40GB
-echo -e "n\np\n3\n\n+40G\nw" | fdisk /dev/sda
-mkfs.ext4 /dev/sda3
+echo -e "n\np\n3\n\n+40G\nw" | fdisk $disk
+mkfs.ext4 "${disk}3"
 
 # Crear partición para home con el resto del espacio disponible
-echo -e "n\np\n4\n\n\nw" | fdisk /dev/sda
-mkfs.ext4 /dev/sda4
+echo -e "n\np\n4\n\n\nw" | fdisk $disk
+mkfs.ext4 "${disk}4"
 
 # Montar particiones
-mount /dev/sda3 /mnt
+mount "${disk}3" /mnt
 mkdir /mnt/boot /mnt/var
-mount /dev/sda1 /mnt/boot
+mount "${disk}1" /mnt/boot
 mkdir /mnt/home
-mount /dev/sda4 /mnt/home
+mount "${disk}4" /mnt/home
 
-echo "Ya estan montaldas las particiones"
+echo "Ya están montadas las particiones."
 
 #Instalamos el sistema
 
