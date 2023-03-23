@@ -93,6 +93,8 @@ while true; do
   fi
 done
 
+echo "$username ALL=(ALL) ALL" >> /etc/sudoers
+
 arch-chroot /mnt /bin/bash <<EOF
 pacman -S nano 
 hwclock --systohc
@@ -111,7 +113,6 @@ echo "::1       localhost" >> /etc/hosts
 echo "127.0.1.1 archayoub.localdomain archayoub" >> /etc/hosts
 pacman -S dhcpcd 
 systemctl enable dhcpcd.service
-echo "$username ALL=(ALL) ALL" >> /etc/sudoers
 # Instalar el cargador de arranque
 grub-install /dev/sda
 grub-mkconfig -o /boot/grub/grub.cfg
