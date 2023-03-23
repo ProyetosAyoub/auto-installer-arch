@@ -77,58 +77,53 @@ pacstrap /mnt base linux linux-firmware base-devel
 pacstrap /mnt grub-bios
 genfstab -p /mnt >> /mnt/etc/fstab
 
-read -s -p "Ingresa la contraseña para el usuario root: " root_password
-echo
-read -s -p "Ingresa la contraseña para el usuario ayoub: " user_password
-echo
-
 arch-chroot /mnt /bin/bash <<EOF
 pacman -S nano --noconfirm
-
 hwclock --systohc
-
 # Configurar el idioma
 echo KEYMAP=es > /etc/vconsole.conf
 echo "es_ES.UTF-8 UTF-8" >> /etc/locale.gen
 locale-gen
 echo "LANG=es_ES.UTF-8" >> /etc/locale.conf
-
 # Configurar la zona horaria
 ln -sf /usr/share/zoneinfo/Europe/Madrid /etc/localtime
-
 # Configurar el nombre del equipo
 echo "arch-ayoub" >> /etc/hostname
-
 # Configurar el archivo hosts
 echo "127.0.0.1 localhost" >> /etc/hosts
 echo "::1       localhost" >> /etc/hosts
 echo "127.0.1.1 archayoub.localdomain archayoub" >> /etc/hosts
-
 pacman -S dhcpcd --noconfirm
-
 systemctl enable dhcpcd.service
-
 # Configurar la contraseña del root
-passwd -p root_password
-
+echo "Ingresa la contraseña de root:"
+read -s rootpass
+echo "Confirma la contraseña de root:"
+read -s rootpass_confirm
+if [ "$rootpass" != "$rootpass_confirm" ]; then
+    echo "Las contraseñas no coinciden. Por favor, inténtalo de nuevo."
+    exit 1
+fi
+echo "root:$rootpass" | chpasswd
 # Crear un usuario y otorgarle permisos de sudo
 useradd -m -g users -G wheel -s /bin/bash ayoub
 # Configurar la contraseña del usuario
-passwd -p user_password ayoub
-
-# Agregar el usuario al archivo sudoers
+echo "Ingresa la contraseña del usuario ayoub:"
+read -s userpass
+echo "Confirma la contraseña del usuario ayoub:"
+read -s userpass_confirm
+if [ "$userpass" != "$userpass_confirm" ]; then
+    echo "Las contraseñas no coinciden. Por favor, inténtalo de nuevo."
+    exit 1
+fi
+echo "ayoub:$userpass" | chpasswd
 echo "ayoub ALL=(ALL) ALL" >> /etc/sudoers
-
 # Instalar el cargador de arranque
 grub-install /dev/sda
 grub-mkconfig -o /boot/grub/grub.cfg
-
 mkinitcpio -p linux
-
 pacman -S networkmanager --noconfirm
-
 systemctl enable NetworkManager
-
 pacman -S sudo --noconfirm
 EOF
 
