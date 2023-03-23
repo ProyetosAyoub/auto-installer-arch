@@ -112,7 +112,6 @@ mkinitcpio -p linux
 pacman -S networkmanager 
 systemctl enable NetworkManager
 pacman -S sudo 
-echo "$username ALL=(ALL) ALL" >> /etc/sudoers
 
 # Configuración de la cuenta de usuario:
 read -p "Introduce el nombre de usuario que deseas crear: " username
