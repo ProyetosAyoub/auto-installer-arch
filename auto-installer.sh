@@ -97,24 +97,11 @@ pacman -S dhcpcd --noconfirm
 systemctl enable dhcpcd.service
 # Configurar la contraseña del root
 passwd
-
 # Crear un usuario y otorgarle permisos de sudo
-read -p "Introduce el nombre de usuario: " username
-while ! [[ "$password" =~ ^[A-Za-z0-9@#$%^&+=]+$ ]]; do
-    read -s -p "Introduce la contraseña del usuario: " password
-    echo ""
-    read -s -p "Confirma la contraseña del usuario: " password_confirmation
-    echo ""
-    if [[ "$password" != "$password_confirmation" ]]; then
-        echo "Las contraseñas no coinciden. Inténtalo de nuevo."
-        password=""
-    fi
-done
-
-useradd -m -g users -G wheel -s /bin/bash "$username"
-echo "$username:$password" | chpasswd
-echo "$username ALL=(ALL) ALL" >> /etc/sudoers
-
+useradd -m -g users -G wheel -s /bin/bash ayoub
+# Configurar la contraseña del usuario
+passwd ayoub
+echo "ayoub ALL=(ALL) ALL" >> /etc/sudoers
 # Instalar el cargador de arranque
 grub-install /dev/sda
 grub-mkconfig -o /boot/grub/grub.cfg
