@@ -18,7 +18,6 @@ timedatectl set-ntp true
 # Verificar si la unidad de disco es la correcta (/dev/sda en este caso)
 lsblk
 read -p "Introduce el nombre de la unidad de disco en la que deseas realizar las operaciones (ejemplo: sda): " disk_name
-read disk_name
 disk="/dev/${disk_name}"
 
 if ! [[ -b "$disk" ]]; then
