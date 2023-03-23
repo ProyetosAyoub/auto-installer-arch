@@ -87,6 +87,7 @@ echo "Configuración de la contraseña del root:"
 passwd
 
 echo "Configuración de la cuenta de usuario:"
+# Configuración de la cuenta de usuario:
 read -p "Introduce el nombre de usuario que deseas crear: " username
 useradd -m -g users -aG wheel -s /bin/bash $username
 
@@ -98,7 +99,6 @@ while true; do
     echo "Las contraseñas no coinciden. Inténtalo de nuevo."
   fi
 done
-fi
 echo "$username ALL=(ALL) ALL" >> /etc/sudoers
 
 arch-chroot /mnt /bin/bash <<EOF
@@ -127,8 +127,9 @@ mkinitcpio -p linux
 pacman -S networkmanager 
 systemctl enable NetworkManager
 pacman -S sudo 
+echo "$username ALL=(ALL) ALL" >> /etc/sudoers
 EOF
 
 umount -R /mnt
 
-echo "Ya esta lista la instalacion a disfrutar!"
+echo "¡Ya está lista la instalación! ¡A disfrutar!"
