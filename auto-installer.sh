@@ -123,7 +123,6 @@ systemctl enable NetworkManager
 pacman -S sudo --noconfirm
 EOF
 
-umount /mnt/boot
 umount -R /mnt
 
 echo "Ya esta lista la instalacion a disfrutar!"
