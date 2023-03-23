@@ -50,21 +50,21 @@ else
 fi
 
 # Crear partición para boot de 1GB
-echo -e "n\np\n1\n\n+1G\nw" | fdisk -t ext4 $disk
+echo -e "n\np\n1\n\n+1G\nw" | fdisk $disk
 mkfs.ext4 "${disk}1"
 parted $disk set 1 boot on
 
 # Crear partición para swap de 2GB
-echo -e "n\np\n2\n\n+2G\nw" | fdisk -t linux-swap $disk
+echo -e "n\np\n2\n\n+2G\nw" | fdisk $disk
 mkswap "${disk}2"
 swapon "${disk}2"
 
 # Crear partición para raiz de 40GB
-echo -e "n\np\n3\n\n+40G\nw" | fdisk -t ext4 $disk
+echo -e "n\np\n3\n\n+40G\nw" | fdisk $disk
 mkfs.ext4 "${disk}3"
 
 # Crear partición para home con el resto del espacio disponible
-echo -e "n\np\n4\n\n\nw" | fdisk -t ext4 $disk
+echo -e "n\np\n4\n\n\nw" | fdisk $disk
 mkfs.ext4 "${disk}4"
 
 # Montar particiones
@@ -74,7 +74,7 @@ mount "${disk}1" /mnt/boot
 mkdir /mnt/home
 mount "${disk}4" /mnt/home
 
-echo "Ya están montadas las particiones."
+echo "Ya están montadas las particiones." 
 
 #Instalamos el sistema
 
