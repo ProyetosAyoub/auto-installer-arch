@@ -78,7 +78,7 @@ pacstrap /mnt grub-bios
 genfstab -p /mnt >> /mnt/etc/fstab
 
 arch-chroot /mnt /bin/bash <<EOF
-pacman -S nano 
+pacman -S nano --noconfirm
 hwclock --systohc
 # Configurar el idioma
 echo KEYMAP=es > /etc/vconsole.conf
