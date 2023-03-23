@@ -74,7 +74,7 @@ echo "Ya están montadas las particiones."
 
 pacman -Sy archlinux-keyring 
 pacstrap /mnt base linux linux-firmware base-devel
-pacstrap /mnt grub-bios -p
+pacstrap /mnt grub-bios
 genfstab -p /mnt >> /mnt/etc/fstab
 
 echo "Configuración de la contraseña del root:"
@@ -82,7 +82,7 @@ passwd
 
 echo "Configuración de la cuenta de usuario:"
 read -p "Introduce el nombre de usuario que deseas crear: " username
-useradd -m -g -a users -aG wheel -s /bin/bash $username
+useradd -m -g users -aG wheel -s /bin/bash $username
 
 while true; do
   passwd $username
@@ -93,7 +93,7 @@ while true; do
   fi
 done
 fi
-echo '"$username" ALL=(ALL) ALL' >> /etc/sudoers
+'echo "$username ALL=(ALL) ALL" >> /etc/sudoers'
 
 arch-chroot /mnt /bin/bash <<EOF
 pacman -S nano 
