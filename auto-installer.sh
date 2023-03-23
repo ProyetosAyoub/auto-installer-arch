@@ -18,47 +18,47 @@ disk="/dev/${disk_name}"
 if ! [[ -b "$disk" ]]; then
   echo "El nombre de la unidad de disco introducido no es válido."
   exit
+fi
 
 # Listar las particiones existentes en la unidad de disco especificada
-echo "Las siguientes particiones existen en la unidad de disco $disk:"
-fdisk -l $disk
+echo "Las siguientes particiones existen en la unidad de disco $disk_name:"
+fdisk -l $disk_diskname
 
 # Solicitar la confirmación del usuario para continuar
-read -p "¿Deseas eliminar todas las particiones en la unidad de disco $disk y eliminar los formatos existentes? (y/n): " confirm
+read -p "¿Deseas eliminar todas las particiones en la unidad de disco $disk_name y eliminar los formatos existentes? (y/n): " confirm
 if [ "$confirm" == "y" ]; then
     # Eliminar las particiones existentes
     echo "Eliminando particiones existentes..."
     for i in $(seq 1 4); do
         parted $disk rm $i || true
     done
-
+fi
     # Eliminar los formatos existentes
     echo "Eliminando formatos existentes..."
     for i in $(seq 1 4); do
-        mkfs.ext4 -F $disk$i || true
+        mkfs.ext4 -f $disk$i || true
     done
     echo "¡Listo!"
 else
     echo "Operación cancelada por el usuario."
     exit 1
 fi
-
 # Crear partición para boot de 1GB
-echo -e "n\np\n1\n\n+1G\nw" | fdisk $disk
+echo -e "n\np\n1\n\n+1G\nw" | fdisk -t ext4 $disk
 mkfs.ext4 "${disk}1"
 parted $disk set 1 boot on
 
 # Crear partición para swap de 2GB
-echo -e "n\np\n2\n\n+2G\nw" | fdisk $disk
+echo -e "n\np\n2\n\n+2G\nw" | fdisk -t linux-swap $disk
 mkswap "${disk}2"
 swapon "${disk}2"
 
 # Crear partición para raiz de 40GB
-echo -e "n\np\n3\n\n+40G\nw" | fdisk $disk
+echo -e "n\np\n3\n\n+40G\nw" | fdisk -t ext4 $disk
 mkfs.ext4 "${disk}3"
 
 # Crear partición para home con el resto del espacio disponible
-echo -e "n\np\n4\n\n\nw" | fdisk $disk
+echo -e "n\np\n4\n\n\nw" | fdisk -t ext4 $disk
 mkfs.ext4 "${disk}4"
 
 # Montar particiones
@@ -82,7 +82,7 @@ passwd
 
 echo "Configuración de la cuenta de usuario:"
 read -p "Introduce el nombre de usuario que deseas crear: " username
-useradd -m -g users -aG wheel -s /bin/bash $username
+useradd -m -g -a users -aG wheel -s /bin/bash $username
 
 while true; do
   passwd $username
@@ -92,8 +92,8 @@ while true; do
     echo "Las contraseñas no coinciden. Inténtalo de nuevo."
   fi
 done
-
-echo '$username ALL=(ALL) ALL' >> /etc/sudoers
+fi
+echo '"$username" ALL=(ALL) ALL' >> /etc/sudoers
 
 arch-chroot /mnt /bin/bash <<EOF
 pacman -S nano 
