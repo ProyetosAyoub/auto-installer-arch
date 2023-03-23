@@ -96,7 +96,7 @@ done
 echo "$username ALL=(ALL) ALL" >> /etc/sudoers
 
 arch-chroot /mnt /bin/bash <<EOF
-pacman -S nano 
+pacman -S nano --noconfirm
 hwclock --systohc
 # Configurar el idioma
 echo KEYMAP=es > /etc/vconsole.conf
@@ -117,9 +117,9 @@ systemctl enable dhcpcd.service
 grub-install /dev/sda
 grub-mkconfig -o /boot/grub/grub.cfg
 mkinitcpio -p linux
-pacman -S networkmanager 
+pacman -S networkmanager --noconfirm 
 systemctl enable NetworkManager
-pacman -S sudo 
+pacman -S sudo --noconfirm
 EOF
 
 umount /mnt/boot
