@@ -72,7 +72,7 @@ echo "Ya están montadas las particiones."
 
 #Instalamos el sistema
 
-pacman -Sy archlinux-keyring --noconfirm
+pacman -Sy archlinux-keyring 
 pacstrap /mnt base linux linux-firmware base-devel
 pacstrap /mnt grub-bios
 genfstab -p /mnt >> /mnt/etc/fstab
@@ -106,9 +106,9 @@ echo "ayoub ALL=(ALL) ALL" >> /etc/sudoers
 grub-install /dev/sda
 grub-mkconfig -o /boot/grub/grub.cfg
 mkinitcpio -p linux
-pacman -S networkmanager --noconfirm
+pacman -S networkmanager
 systemctl enable NetworkManager
-pacman -S sudo --noconfirm
+pacman -S sudo 
 EOF
 
 umount /mnt/boot
