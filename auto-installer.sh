@@ -77,6 +77,11 @@ pacstrap /mnt base linux linux-firmware base-devel
 pacstrap /mnt grub-bios
 genfstab -p /mnt >> /mnt/etc/fstab
 
+read -s -p "Ingresa la contraseña para el usuario root: " root_password
+echo
+read -s -p "Ingresa la contraseña para el usuario ayoub: " user_password
+echo
+
 arch-chroot /mnt /bin/bash <<EOF
 pacman -S nano --noconfirm
 
@@ -104,19 +109,15 @@ pacman -S dhcpcd --noconfirm
 systemctl enable dhcpcd.service
 
 # Configurar la contraseña del root
-read -s -p "Ingrese la contraseña de root: " root_password
-echo "root:$root_password" | chpasswd
+passwd -p root_password
 
 # Crear un usuario y otorgarle permisos de sudo
-read -p "Ingrese el nombre de usuario: " username
-useradd -m -g users -G wheel -s /bin/bash $username
-
+useradd -m -g users -G wheel -s /bin/bash ayoub
 # Configurar la contraseña del usuario
-read -s -p "Ingrese la contraseña de $username: " user_password
-echo "$username:$user_password" | chpasswd
+passwd -p user_password ayoub
 
 # Agregar el usuario al archivo sudoers
-echo "$username ALL=(ALL) ALL" >> /etc/sudoers
+echo "ayoub ALL=(ALL) ALL" >> /etc/sudoers
 
 # Instalar el cargador de arranque
 grub-install /dev/sda
