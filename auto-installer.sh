@@ -86,21 +86,6 @@ genfstab -p /mnt >> /mnt/etc/fstab
 echo "Configuración de la contraseña del root:"
 passwd
 
-echo "Configuración de la cuenta de usuario:"
-# Configuración de la cuenta de usuario:
-read -p "Introduce el nombre de usuario que deseas crear: " username
-useradd -m -g users -aG wheel -s /bin/bash $username
-
-while true; do
-  passwd $username
-  if [ $? -eq 0 ]; then
-    break
-  else
-    echo "Las contraseñas no coinciden. Inténtalo de nuevo."
-  fi
-done
-echo "$username ALL=(ALL) ALL" >> /etc/sudoers
-
 arch-chroot /mnt /bin/bash <<EOF
 pacman -S nano 
 hwclock --systohc
@@ -128,6 +113,21 @@ pacman -S networkmanager
 systemctl enable NetworkManager
 pacman -S sudo 
 echo "$username ALL=(ALL) ALL" >> /etc/sudoers
+
+# Configuración de la cuenta de usuario:
+read -p "Introduce el nombre de usuario que deseas crear: " username
+useradd -m -g users -aG wheel -s /bin/bash $username
+
+while true; do
+  passwd $username
+  if [ $? -eq 0 ]; then
+    break
+  else
+    echo "Las contraseñas no coinciden. Inténtalo de nuevo."
+  fi
+done
+echo "$username ALL=(ALL) ALL" >> /etc/sudoers
+
 EOF
 
 umount -R /mnt
