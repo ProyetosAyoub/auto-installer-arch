@@ -104,15 +104,19 @@ pacman -S dhcpcd --noconfirm
 systemctl enable dhcpcd.service
 
 # Configurar la contraseña del root
-passwd
+read -s -p "Ingrese la contraseña de root: " root_password
+echo "root:$root_password" | chpasswd
 
 # Crear un usuario y otorgarle permisos de sudo
-useradd -m -g users -G wheel -s /bin/bash ayoub
+read -p "Ingrese el nombre de usuario: " username
+useradd -m -g users -G wheel -s /bin/bash $username
 
 # Configurar la contraseña del usuario
-passwd ayoub
+read -s -p "Ingrese la contraseña de $username: " user_password
+echo "$username:$user_password" | chpasswd
 
-echo "ayoub ALL=(ALL) ALL" >> /etc/sudoers
+# Agregar el usuario al archivo sudoers
+echo "$username ALL=(ALL) ALL" >> /etc/sudoers
 
 # Instalar el cargador de arranque
 grub-install /dev/sda
