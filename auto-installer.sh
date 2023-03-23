@@ -1,8 +1,10 @@
-#!/bin/bash
 
-if [ "$(id -u)" -ne 0 ]; then
-  echo "Este script debe ser ejecutado con permisos de superusuario (root)."
-  exit 1
+#!/bin/bash
+set -euo pipefail
+
+if [[ $EUID -ne 0 ]]; then
+   echo "Este script debe ser ejecutado como root" 
+   exit 1
 fi
 
 # Verificar la conexión a Internet
@@ -37,17 +39,19 @@ if [ "$confirm" == "y" ]; then
     for i in $(seq 1 4); do
         parted $disk rm $i || true
     done
-fi
+
     # Eliminar los formatos existentes
     echo "Eliminando formatos existentes..."
     for i in $(seq 1 4); do
         mkfs.ext4 -f $disk$i || true
     done
+
     echo "¡Listo!"
 else
     echo "Operación cancelada por el usuario."
     exit 1
 fi
+
 # Crear partición para boot de 1GB
 echo -e "n\np\n1\n\n+1G\nw" | fdisk -t ext4 $disk
 mkfs.ext4 "${disk}1"
