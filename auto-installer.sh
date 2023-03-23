@@ -77,6 +77,22 @@ pacstrap /mnt base linux linux-firmware base-devel
 pacstrap /mnt grub-bios
 genfstab -p /mnt >> /mnt/etc/fstab
 
+echo "Configuración de la contraseña del root:"
+passwd
+
+echo "Configuración de la cuenta de usuario:"
+read -p "Introduce el nombre de usuario que deseas crear: " username
+useradd -m -g users -G wheel -s /bin/bash $username
+
+while true; do
+  passwd $username
+  if [ $? -eq 0 ]; then
+    break
+  else
+    echo "Las contraseñas no coinciden. Inténtalo de nuevo."
+  fi
+done
+
 arch-chroot /mnt /bin/bash <<EOF
 pacman -S nano 
 hwclock --systohc
@@ -95,27 +111,7 @@ echo "::1       localhost" >> /etc/hosts
 echo "127.0.1.1 archayoub.localdomain archayoub" >> /etc/hosts
 pacman -S dhcpcd 
 systemctl enable dhcpcd.service
-# Configurar la contraseña del root
-while true; do
-  passwd -p
-  if [ $? -eq 0 ]; then
-    break
-  else
-    echo "Las contraseñas no coinciden. Inténtalo de nuevo."
-  fi
-done
-# Crear un usuario y otorgarle permisos de sudo
-useradd -m -g users -G wheel -s /bin/bash ayoub
-# Configurar la contraseña del usuario
-while true; do
-  passwd ayoub -p
-  if [ $? -eq 0 ]; then
-    break
-  else
-    echo "Las contraseñas no coinciden. Inténtalo de nuevo."
-  fi
-done
-echo "ayoub ALL=(ALL) ALL" >> /etc/sudoers
+echo "$username ALL=(ALL) ALL" >> /etc/sudoers
 # Instalar el cargador de arranque
 grub-install /dev/sda
 grub-mkconfig -o /boot/grub/grub.cfg
