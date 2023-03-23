@@ -86,6 +86,9 @@ genfstab -p /mnt >> /mnt/etc/fstab
 echo "Configuración de la contraseña del root:"
 passwd
 
+# Solicitar el nombre de usuario
+read -p "Introduce el nombre de usuario que deseas crear: " username
+
 arch-chroot /mnt /bin/bash <<EOF
 pacman -S nano 
 hwclock --systohc
@@ -114,7 +117,6 @@ systemctl enable NetworkManager
 pacman -S sudo 
 
 # Configuración de la cuenta de usuario:
-read -p "Introduce el nombre de usuario que deseas crear: " username
 useradd -m -g users -aG wheel -s /bin/bash $username
 
 while true; do
