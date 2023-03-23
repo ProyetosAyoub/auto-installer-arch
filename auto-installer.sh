@@ -1,5 +1,10 @@
 #!/bin/bash
 
+if [ "$(id -u)" -ne 0 ]; then
+  echo "Este script debe ser ejecutado con permisos de superusuario (root)."
+  exit 1
+fi
+
 # Verificar la conexión a Internet
 ping -c 3 google.com
 
