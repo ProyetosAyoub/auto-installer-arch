@@ -22,7 +22,7 @@ fi
 
 # Listar las particiones existentes en la unidad de disco especificada
 echo "Las siguientes particiones existen en la unidad de disco $disk_name:"
-fdisk -l $disk_diskname
+fdisk -l $disk_name
 
 # Solicitar la confirmación del usuario para continuar
 read -p "¿Deseas eliminar todas las particiones en la unidad de disco $disk_name y eliminar los formatos existentes? (y/n): " confirm
