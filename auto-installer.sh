@@ -12,12 +12,12 @@ timedatectl set-ntp true
 # Verificar si la unidad de disco es la correcta (/dev/sda en este caso)
 lsblk
 read -p "Introduce el nombre de la unidad de disco en la que deseas realizar las operaciones (ejemplo: sda): " disk_name
+read disk_name
 disk="/dev/${disk_name}"
 
 if ! [[ -b "$disk" ]]; then
   echo "El nombre de la unidad de disco introducido no es válido."
-  exit 1
-fi
+  exit
 
 # Listar las particiones existentes en la unidad de disco especificada
 echo "Las siguientes particiones existen en la unidad de disco $disk:"
@@ -82,7 +82,7 @@ passwd
 
 echo "Configuración de la cuenta de usuario:"
 read -p "Introduce el nombre de usuario que deseas crear: " username
-useradd -m -g users -G wheel -s /bin/bash $username
+useradd -m -g users -aG wheel -s /bin/bash $username
 
 while true; do
   passwd $username
@@ -93,7 +93,7 @@ while true; do
   fi
 done
 
-echo "$username ALL=(ALL) ALL" >> /etc/sudoers
+echo '$username ALL=(ALL) ALL' >> /etc/sudoers
 
 arch-chroot /mnt /bin/bash <<EOF
 pacman -S nano 
