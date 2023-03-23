@@ -114,6 +114,7 @@ echo "127.0.1.1 archayoub.localdomain archayoub" >> /etc/hosts
 pacman -S dhcpcd 
 systemctl enable dhcpcd.service
 # Instalar el cargador de arranque
+pacman -S grub --noconfirm
 grub-install /dev/sda
 grub-mkconfig -o /boot/grub/grub.cfg
 mkinitcpio -p linux
