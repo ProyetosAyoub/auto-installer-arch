@@ -4,7 +4,7 @@
 ping -c 3 google.com
 
 # Configurar la distribución de teclado para España
-loadkeys es
+localectl set-keymap es
 
 # Verificar la hora
 timedatectl set-ntp true
@@ -74,7 +74,7 @@ echo "Ya están montadas las particiones."
 
 pacman -Sy archlinux-keyring 
 pacstrap /mnt base linux linux-firmware base-devel
-pacstrap /mnt grub-bios
+pacstrap /mnt grub-bios -p
 genfstab -p /mnt >> /mnt/etc/fstab
 
 echo "Configuración de la contraseña del root:"
