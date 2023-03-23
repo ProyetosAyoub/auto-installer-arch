@@ -41,7 +41,7 @@ if [ "$confirm" == "y" ]; then
     # Eliminar los formatos existentes
     echo "Eliminando formatos existentes..."
     for i in $(seq 1 4); do
-        mkfs.ext4 -f $disk$i || true
+        mkfs.ext4 -f ${disk}$i || true
     done
 
     echo "¡Listo!"
