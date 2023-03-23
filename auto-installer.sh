@@ -78,7 +78,7 @@ pacstrap /mnt grub-bios
 genfstab -p /mnt >> /mnt/etc/fstab
 
 arch-chroot /mnt /bin/bash <<EOF
-pacman -S nano --noconfirm
+pacman -S nano 
 hwclock --systohc
 # Configurar el idioma
 echo KEYMAP=es > /etc/vconsole.conf
@@ -96,28 +96,25 @@ echo "127.0.1.1 archayoub.localdomain archayoub" >> /etc/hosts
 pacman -S dhcpcd --noconfirm
 systemctl enable dhcpcd.service
 # Configurar la contraseña del root
-echo "Ingresa la contraseña de root:"
-read -s rootpass
-echo "Confirma la contraseña de root:"
-read -s rootpass_confirm
-if [ "$rootpass" != "$rootpass_confirm" ]; then
-    echo "Las contraseñas no coinciden. Por favor, inténtalo de nuevo."
-    exit 1
-fi
-echo "root:$rootpass" | chpasswd
+passwd
+
 # Crear un usuario y otorgarle permisos de sudo
-useradd -m -g users -G wheel -s /bin/bash ayoub
-# Configurar la contraseña del usuario
-echo "Ingresa la contraseña del usuario ayoub:"
-read -s userpass
-echo "Confirma la contraseña del usuario ayoub:"
-read -s userpass_confirm
-if [ "$userpass" != "$userpass_confirm" ]; then
-    echo "Las contraseñas no coinciden. Por favor, inténtalo de nuevo."
-    exit 1
-fi
-echo "ayoub:$userpass" | chpasswd
-echo "ayoub ALL=(ALL) ALL" >> /etc/sudoers
+read -p "Introduce el nombre de usuario: " username
+while ! [[ "$password" =~ ^[A-Za-z0-9@#$%^&+=]+$ ]]; do
+    read -s -p "Introduce la contraseña del usuario: " password
+    echo ""
+    read -s -p "Confirma la contraseña del usuario: " password_confirmation
+    echo ""
+    if [[ "$password" != "$password_confirmation" ]]; then
+        echo "Las contraseñas no coinciden. Inténtalo de nuevo."
+        password=""
+    fi
+done
+
+useradd -m -g users -G wheel -s /bin/bash "$username"
+echo "$username:$password" | chpasswd
+echo "$username ALL=(ALL) ALL" >> /etc/sudoers
+
 # Instalar el cargador de arranque
 grub-install /dev/sda
 grub-mkconfig -o /boot/grub/grub.cfg
