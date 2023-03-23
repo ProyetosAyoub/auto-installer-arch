@@ -105,17 +105,17 @@ while true; do
   fi
 done
 # Crear un usuario y otorgarle permisos de sudo
-useradd -m -g users -G wheel -s /bin/bash $usuario
+useradd -m -g users -G wheel -s /bin/bash ayoub
 # Configurar la contraseña del usuario
 while true; do
-  passwd ${usuario} -p
+  passwd ayoub -p
   if [ $? -eq 0 ]; then
     break
   else
     echo "Las contraseñas no coinciden. Inténtalo de nuevo."
   fi
 done
-echo "${usuario} ALL=(ALL) ALL" >> /etc/sudoers
+echo "ayoub ALL=(ALL) ALL" >> /etc/sudoers
 # Instalar el cargador de arranque
 grub-install /dev/sda
 grub-mkconfig -o /boot/grub/grub.cfg
