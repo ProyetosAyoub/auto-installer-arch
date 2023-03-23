@@ -96,7 +96,7 @@ done
 echo "$username ALL=(ALL) ALL" >> /etc/sudoers
 
 arch-chroot /mnt /bin/bash <<EOF
-pacman -S nano --noconfirm
+pacman -S nano 
 hwclock --systohc
 # Configurar el idioma
 echo KEYMAP=es > /etc/vconsole.conf
@@ -114,13 +114,13 @@ echo "127.0.1.1 archayoub.localdomain archayoub" >> /etc/hosts
 pacman -S dhcpcd 
 systemctl enable dhcpcd.service
 # Instalar el cargador de arranque
-pacman -S grub --noconfirm
+pacman -S grub
 grub-install /dev/sda
 grub-mkconfig -o /boot/grub/grub.cfg
 mkinitcpio -p linux
-pacman -S networkmanager --noconfirm 
+pacman -S networkmanager 
 systemctl enable NetworkManager
-pacman -S sudo --noconfirm
+pacman -S sudo 
 EOF
 
 umount -R /mnt
