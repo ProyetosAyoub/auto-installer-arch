@@ -86,13 +86,12 @@ genfstab -p /mnt >> /mnt/etc/fstab
 echo "Configuración de la contraseña del root:"
 passwd
 
-arch-chroot /mnt /bin/bash <<EOF
-pacman -S nano
+arch-chroot /mnt /bin/bash << pacman -S nano
 
 # Configurar el idioma
-echo "Configuración del idioma:"
-read -p "Introduce el keymap (por ejemplo, es): " keymap
-echo "KEYMAP=$keymap" > /etc/vconsole.conf
+arch-chroot /mnt /bin/bash << echo "Configuración del idioma:"
+arch-chroot /mnt /bin/bash << read -p "Introduce el keymap (por ejemplo, es): " keymap
+arch-chroot /mnt /bin/bash << echo "KEYMAP=$keymap" > /etc/vconsole.conf
 echo "Introduce el código de la localización (por ejemplo, es_ES.UTF-8): "
 read locale_code
 echo "$locale_code UTF-8" >> /etc/locale.gen
