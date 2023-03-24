@@ -89,7 +89,7 @@ echo "Generando el archivo fstab"
 genfstab -U /mnt >> /mnt/etc/fstab
 
 echo "Entrando en el entorno chroot"
-arch-chroot /mnt /bin/bash <<EOF
+arch-chroot /mnt /bin/bash -c "
 
 echo "Configurando el idioma"
 echo "KEYMAP=es_ES" > /etc/vconsole.conf
@@ -138,6 +138,7 @@ done
 
 echo "$username ALL=(ALL) ALL" >> /etc/sudoers
 
+"
 EOF
 
 echo "Saliendo del entorno chroot"
