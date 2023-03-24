@@ -17,53 +17,56 @@ timedatectl set-ntp true
 
 # Verificar si la unidad de disco es la correcta (/dev/sda en este caso)
 lsblk
-read -p "Introduce el nombre de la unidad de disco en la que deseas realizar las operaciones (ejemplo: sda): " disk_name
-disk="/dev/${disk_name}"
+# Verificar si se ha proporcionado el nombre de la unidad de disco
+if [ -z "$1" ]; then
+  echo "Debes especificar el nombre de la unidad de disco (ejemplo: sda)."
+  exit 1
+fi
 
+disk="/dev/$1"
+
+# Verificar si la unidad de disco es válida
 if ! [[ -b "$disk" ]]; then
   echo "El nombre de la unidad de disco introducido no es válido."
-  exit
+  exit 1
 fi
 
-# Listar las particiones existentes en la unidad de disco especificada
-echo "Las siguientes particiones existen en la unidad de disco $disk_name:"
-fdisk -l /dev/$disk_name
-
-# Solicitar la confirmación del usuario para continuar
-read -p "¿Deseas eliminar todas las particiones en la unidad de disco $disk_name y eliminar los formatos existentes? (y/n): " confirm
+# Preguntar al usuario si desea eliminar las particiones existentes
+read -p "¿Deseas eliminar todas las particiones en la unidad de disco $1 y eliminar los formatos existentes? (y/n): " confirm
 if [ "$confirm" == "y" ]; then
-    # Eliminar las particiones existentes
-    echo "Eliminando particiones existentes..."
-    for i in $(seq 1 4); do
-        parted $disk rm $i || true
-    done
+  # Detener cualquier proceso que esté usando las particiones
+  umount -R /dev/$1* 2> /dev/null
+  swapoff -a
 
-    # Eliminar los formatos existentes
-    echo "Eliminando formatos existentes..."
-    for i in $(seq 1 4); do
-        wipefs -af ${disk}$i || true
-    echo "¡Listo!"
-    done
+  # Eliminar las particiones existentes
+  echo "Eliminando particiones existentes..."
+  parted -s $disk mklabel msdos
+  echo "¡Listo!"
 else
-    echo "Operación cancelada por el usuario."
-    exit 1
+  echo "Operación cancelada por el usuario."
+  exit 1
 fi
 
-# Crear partición para boot de 1GB
-echo -e "n\np\n1\n\n+1G\nw" | fdisk $disk
+# Preguntar al usuario el tamaño de las particiones
+read -p "Introduce el tamaño de la partición para /boot en MB (ejemplo: 1024): " boot_size
+read -p "Introduce el tamaño de la partición para swap en MB (ejemplo: 2048): " swap_size
+read -p "Introduce el tamaño de la partición para / en MB (ejemplo: 40960): " root_size
+
+# Crear partición para /boot
+echo -e "n\np\n1\n\n+${boot_size}M\nw" | fdisk $disk
 mkfs.ext4 "${disk}1"
 parted $disk set 1 boot on
 
-# Crear partición para swap de 2GB
-echo -e "n\np\n2\n\n+2G\nw" | fdisk $disk
+# Crear partición para swap
+echo -e "n\np\n2\n\n+${swap_size}M\nw" | fdisk $disk
 mkswap "${disk}2"
 swapon "${disk}2"
 
-# Crear partición para raiz de 40GB
-echo -e "n\np\n3\n\n+40G\nw" | fdisk $disk
+# Crear partición para /
+echo -e "n\np\n3\n\n+${root_size}M\nw" | fdisk $disk
 mkfs.ext4 "${disk}3"
 
-# Crear partición para home con el resto del espacio disponible
+# Crear partición para /home con el resto del espacio disponible
 echo -e "n\np\n4\n\n\nw" | fdisk $disk
 mkfs.ext4 "${disk}4"
 
@@ -74,8 +77,7 @@ mount "${disk}1" /mnt/boot
 mkdir /mnt/home
 mount "${disk}4" /mnt/home
 
-echo "Ya están montadas las particiones." 
-
+echo "Ya están montadas las particiones."
 echo "Actualizando los repositorios y el keyring de Arch Linux"
 pacman -Sy archlinux-keyring
 
