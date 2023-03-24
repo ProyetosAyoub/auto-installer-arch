@@ -76,83 +76,76 @@ mount "${disk}4" /mnt/home
 
 echo "Ya están montadas las particiones." 
 
-#Instalamos el sistema
+#!/bin/bash
 
+echo "Actualizando los repositorios y el keyring de Arch Linux"
 pacman -Sy archlinux-keyring
-pacstrap /mnt base linux linux-firmware base-devel
-pacstrap /mnt grub
-genfstab -p /mnt >> /mnt/etc/fstab
 
-echo "Configuración de la contraseña del root:"
-passwd
+echo "Instalando el sistema base de Arch Linux"
+pacstrap /mnt base linux linux-firmware
 
-arch-chroot /mnt /bin/bash << pacman -S nano
+echo "Instalando paquetes adicionales para el sistema base"
+pacstrap /mnt base-devel nano grub dhcpcd networkmanager sudo
 
-# Configurar el idioma
-arch-chroot /mnt /bin/bash << echo "Configuración del idioma:"
-arch-chroot /mnt /bin/bash << read -p "Introduce el keymap (por ejemplo, es): " keymap
-arch-chroot /mnt /bin/bash << echo "KEYMAP=$keymap" > /etc/vconsole.conf
-echo "Introduce el código de la localización (por ejemplo, es_ES.UTF-8): "
-read locale_code
-echo "$locale_code UTF-8" >> /etc/locale.gen
+echo "Generando el archivo fstab"
+genfstab -U /mnt >> /mnt/etc/fstab
+
+echo "Entrando en el entorno chroot"
+arch-chroot /mnt /bin/bash <<EOF
+
+echo "Configurando el idioma"
+read -p "Introduce el código del idioma (por ejemplo, es): " language_code
+echo "KEYMAP=$language_code" > /etc/vconsole.conf
+echo "$language_code.UTF-8 UTF-8" >> /etc/locale.gen
 locale-gen
-echo "LANG=$locale_code" >> /etc/locale.conf
+echo "LANG=$language_code.UTF-8" > /etc/locale.conf
 
-# Configurar la zona horaria
-echo "Configuración de la zona horaria:"
-echo "Introduce la zona horaria (por ejemplo, Europe/Madrid):"
-read timezone
+echo "Configurando la zona horaria"
+read -p "Introduce la zona horaria (por ejemplo, Europe/Madrid): " timezone
 ln -sf /usr/share/zoneinfo/$timezone /etc/localtime
 
-# Configurar el nombre del equipo
-echo "Configuración del nombre del equipo:"
+echo "Configurando el nombre del equipo"
 read -p "Introduce el nombre del equipo: " hostname
 echo "$hostname" > /etc/hostname
 
-# Configurar el archivo hosts
-echo "Configuración del archivo hosts:"
-echo "Introduce la dirección IP (por ejemplo, 127.0.0.1):"
-read ip_address
-echo "$ip_address localhost" >> /etc/hosts
-echo "::1       localhost" >> /etc/hosts
-echo "$ip_address $hostname.localdomain $hostname" >> /etc/hosts
+echo "Configurando el archivo hosts"
+read -p "Introduce la dirección IP (por ejemplo, 127.0.0.1): " ip_address
+echo "$ip_address    localhost" >> /etc/hosts
+echo "::1    localhost" >> /etc/hosts
+echo "$ip_address    $hostname.localdomain    $hostname" >> /etc/hosts
 
-pacman -S dhcpcd 
-systemctl enable dhcpcd.service
+echo "Configurando el gestor de red"
+systemctl enable NetworkManager.service
 
-# Instalar el cargador de arranque
-echo "Instalación del cargador de arranque:"
-pacman -S grub
-echo "Introduce el dispositivo donde instalar GRUB (por ejemplo, /dev/sda):"
-read device
-grub-install $device
+echo "Configurando el gestor de arranque GRUB"
+read -p "Introduce el dispositivo donde instalar GRUB (por ejemplo, /dev/sda): " device
+grub-install --target=i386-pc $device
 grub-mkconfig -o /boot/grub/grub.cfg
-mkinitcpio -p linux
+mkinitcpio -P
 
-pacman -S networkmanager 
-systemctl enable NetworkManager
-
-pacman -S sudo 
-# Configuración de la cuenta de usuario:
-echo "Configuración de la cuenta de usuario:"
+echo "Creando un usuario nuevo"
 read -p "Introduce el nombre de usuario que deseas crear: " username
-useradd -m -g users -aG wheel -s /bin/bash $username
-
+useradd -m -G wheel -s /bin/bash $username
 while true; do
-  read -s -p "Introduce la contraseña para $username: " password
-  echo
-  read -s -p "Vuelve a introducir la contraseña: " password2
-  echo
-  if [ "$password" = "$password2" ]; then
-    echo "$username:$password" | chpasswd
-    break
-  else
-    echo "Las contraseñas no coinciden. Inténtalo de nuevo."
-  fi
+    read -s -p "Introduce la contraseña para $username: " password
+    echo
+    read -s -p "Vuelve a introducir la contraseña: " password2
+    echo
+    if [ "$password" = "$password2" ]; then
+        echo "$username:$password" | chpasswd
+        break
+    else
+        echo "Las contraseñas no coinciden. Inténtalo de nuevo."
+    fi
 done
 
 echo "$username ALL=(ALL) ALL" >> /etc/sudoers
-EOF 
+
+EOF
+
+echo "Saliendo del entorno chroot"
+
 umount -R /mnt
 
-echo "¡Ya está lista la instalación! ¡A disfrutar!"
+echo "¡La instalación se ha completado con éxito! Reinicia tu sistema y disfruta de tu nuevo sistema Arch Linux."
+
