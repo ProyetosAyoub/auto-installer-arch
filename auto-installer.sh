@@ -105,38 +105,38 @@ echo 'Configurando el nombre del equipo';
 read -p 'Introduce el nombre del equipo: ' hostname;
 echo '$hostname' > /etc/hostname;
 
-echo "Configurando el archivo hosts"
-read -p "Introduce la dirección IP (por ejemplo, 127.0.0.1): " ip_address
-echo "$ip_address    localhost" >> /etc/hosts
-echo "::1    localhost" >> /etc/hosts
-echo "$ip_address    $hostname.localdomain    $hostname" >> /etc/hosts
+echo 'Configurando el archivo hosts';
+read -p 'Introduce la dirección IP (por ejemplo, 127.0.0.1): ' ip_address;
+echo '$ip_address    localhost' >> /etc/hosts;
+echo '::1    localhost' >> /etc/hosts;
+echo '$ip_address    $hostname.localdomain    $hostname' >> /etc/hosts;
 
-echo "Configurando el gestor de red"
-systemctl enable NetworkManager.service
+echo 'Configurando el gestor de red';
+systemctl enable NetworkManager.service;
 
-echo "Configurando el gestor de arranque GRUB"
-read -p "Introduce el dispositivo donde instalar GRUB (por ejemplo, /dev/sda): " device
-grub-install --target=i386-pc $device
-grub-mkconfig -o /boot/grub/grub.cfg
-mkinitcpio -P
+echo 'Configurando el gestor de arranque GRUB';
+read -p 'Introduce el dispositivo donde instalar GRUB (por ejemplo, /dev/sda): ' device;
+grub-install --target=i386-pc $device;
+grub-mkconfig -o /boot/grub/grub.cfg;
+mkinitcpio -P linux;
 
-echo "Creando un usuario nuevo"
-read -p "Introduce el nombre de usuario que deseas crear: " username
-useradd -m -G wheel -s /bin/bash $username
+echo 'Creando un usuario nuevo';
+read -p 'Introduce el nombre de usuario que deseas crear: ' username;
+useradd -m -G wheel -s /bin/bash $username;
 while true; do
-    read -s -p "Introduce la contraseña para $username: " password
+    read -s -p 'Introduce la contraseña para $username: ' password;
     echo
-    read -s -p "Vuelve a introducir la contraseña: " password2
+    read -s -p 'Vuelve a introducir la contraseña: ' password2
     echo
-    if [ "$password" = "$password2" ]; then
-        echo "$username:$password" | chpasswd
+    if [ '$password' = '$password2' ]; then
+        echo '$username:$password' | chpasswd
         break
     else
-        echo "Las contraseñas no coinciden. Inténtalo de nuevo."
+        echo 'Las contraseñas no coinciden. Inténtalo de nuevo.';
     fi
 done
 
-echo "$username ALL=(ALL) ALL" >> /etc/sudoers
+echo '$username ALL=(ALL) ALL' >> /etc/sudoers
 
 "
 EOF
