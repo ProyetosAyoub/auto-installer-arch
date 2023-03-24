@@ -78,7 +78,7 @@ echo "Ya están montadas las particiones."
 
 #Instalamos el sistema
 
-pacman -Sy archlinux-keyring 
+pacman -Sy archlinux-keyring
 pacstrap /mnt base linux linux-firmware base-devel
 pacstrap /mnt grub
 genfstab -p /mnt >> /mnt/etc/fstab
@@ -86,51 +86,74 @@ genfstab -p /mnt >> /mnt/etc/fstab
 echo "Configuración de la contraseña del root:"
 passwd
 
-# Solicitar el nombre de usuario
-read -p "Introduce el nombre de usuario que deseas crear: " username
+arch-chroot /mnt /bin/bash <<EOF
+pacman -S nano
 
-arch-chroot /mnt /bin/bash <<-EOF
-pacman -S nano 
-hwclock --systohc
 # Configurar el idioma
-echo KEYMAP=es > /etc/vconsole.conf
-echo "es_ES.UTF-8 UTF-8" >> /etc/locale.gen
+echo "Configuración del idioma:"
+read -p "Introduce el keymap (por ejemplo, es): " keymap
+echo "KEYMAP=$keymap" > /etc/vconsole.conf
+echo "Introduce el código de la localización (por ejemplo, es_ES.UTF-8): "
+read locale_code
+echo "$locale_code UTF-8" >> /etc/locale.gen
 locale-gen
-echo "LANG=es_ES.UTF-8" >> /etc/locale.conf
+echo "LANG=$locale_code" >> /etc/locale.conf
+
 # Configurar la zona horaria
-ln -sf /usr/share/zoneinfo/Europe/Madrid /etc/localtime
+echo "Configuración de la zona horaria:"
+echo "Introduce la zona horaria (por ejemplo, Europe/Madrid):"
+read timezone
+ln -sf /usr/share/zoneinfo/$timezone /etc/localtime
+
 # Configurar el nombre del equipo
-echo "arch-ayoub" >> /etc/hostname
+echo "Configuración del nombre del equipo:"
+read -p "Introduce el nombre del equipo: " hostname
+echo "$hostname" > /etc/hostname
+
 # Configurar el archivo hosts
-echo "127.0.0.1 localhost" >> /etc/hosts
+echo "Configuración del archivo hosts:"
+echo "Introduce la dirección IP (por ejemplo, 127.0.0.1):"
+read ip_address
+echo "$ip_address localhost" >> /etc/hosts
 echo "::1       localhost" >> /etc/hosts
-echo "127.0.1.1 archayoub.localdomain archayoub" >> /etc/hosts
+echo "$ip_address $hostname.localdomain $hostname" >> /etc/hosts
+
 pacman -S dhcpcd 
 systemctl enable dhcpcd.service
+
 # Instalar el cargador de arranque
+echo "Instalación del cargador de arranque:"
 pacman -S grub
-grub-install /dev/sda
+echo "Introduce el dispositivo donde instalar GRUB (por ejemplo, /dev/sda):"
+read device
+grub-install $device
 grub-mkconfig -o /boot/grub/grub.cfg
 mkinitcpio -p linux
+
 pacman -S networkmanager 
 systemctl enable NetworkManager
-pacman -S sudo 
 
+pacman -S sudo 
 # Configuración de la cuenta de usuario:
+echo "Configuración de la cuenta de usuario:"
+read -p "Introduce el nombre de usuario que deseas crear: " username
 useradd -m -g users -aG wheel -s /bin/bash $username
 
 while true; do
-  passwd $username
-  if [ $? -eq 0 ]; then
+  read -s -p "Introduce la contraseña para $username: " password
+  echo
+  read -s -p "Vuelve a introducir la contraseña: " password2
+  echo
+  if [ "$password" = "$password2" ]; then
+    echo "$username:$password" | chpasswd
     break
   else
     echo "Las contraseñas no coinciden. Inténtalo de nuevo."
   fi
 done
+
 echo "$username ALL=(ALL) ALL" >> /etc/sudoers
-
-EOF
-
+EOF 
 umount -R /mnt
 
 echo "¡Ya está lista la instalación! ¡A disfrutar!"
