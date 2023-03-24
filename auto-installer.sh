@@ -91,10 +91,11 @@ genfstab -U /mnt >> /mnt/etc/fstab
 echo "Entrando en el entorno chroot"
 arch-chroot /mnt /bin/bash -c '
 echo "Configurando el idioma";
-echo "KEYMAP=es_ES" > /etc/vconsole.conf;
-echo "es_ES.UTF-8 UTF-8" >> /etc/locale.gen;
+read -p "Introduce el código del idioma (por ejemplo, es): " language_code;
+echo "KEYMAP=$language_code" > /etc/vconsole.conf;
+echo "$language_code.UTF-8 UTF-8" >> /etc/locale.gen;
 locale-gen;
-echo "LANG=es_ES.UTF-8" > /etc/locale.conf;
+echo "LANG=$language_code.UTF-8" > /etc/locale.conf;
 echo "Configurando la zona horaria";
 read -p "Introduce la zona horaria (por ejemplo, Europe/Madrid): " timezone;
 ln -sf /usr/share/zoneinfo/$timezone /etc/localtime;
