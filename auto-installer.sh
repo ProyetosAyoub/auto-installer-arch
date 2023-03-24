@@ -130,7 +130,6 @@ while true; do
 done
 echo "$username ALL=(ALL) ALL" >> /etc/sudoers
 '
-EOF
 
 echo "Saliendo del entorno chroot"
 
