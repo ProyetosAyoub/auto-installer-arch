@@ -95,7 +95,7 @@ echo "Configurando el idioma"
 echo "KEYMAP=es_ES" > /etc/vconsole.conf
 echo "es_ES.UTF-8 UTF-8" >> /etc/locale.gen
 locale-gen
-echo "LANG=$language_code.UTF-8" > /etc/locale.conf
+echo "LANG=es_ES.UTF-8" > /etc/locale.conf
 
 echo "Configurando la zona horaria"
 read -p "Introduce la zona horaria (por ejemplo, Europe/Madrid): " timezone
