@@ -18,7 +18,7 @@ timedatectl set-ntp true
 # Verificar si la unidad de disco es la correcta (/dev/sda en este caso)
 lsblk
 # Verificar si se ha proporcionado el nombre de la unidad de disco
-if [ -z '$1' ]; then
+if [ -z "$1" ]; then
   echo "Debes especificar el nombre de la unidad de disco (ejemplo: sda)."
   exit 1
 fi
