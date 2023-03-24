@@ -36,13 +36,13 @@ if [ "$confirm" == "y" ]; then
     for i in $(seq 1 4); do
         parted $disk rm $i || true
     done
-    
+
     # Eliminar los formatos existentes
     echo "Eliminando formatos existentes..."
     for i in $(seq 1 4); do
-        mkfs.ext4 -f ${disk}$i || true
-    done
+        wipefs -af ${disk}$i || true
     echo "¡Listo!"
+    done
 else
     echo "Operación cancelada por el usuario."
     exit 1
