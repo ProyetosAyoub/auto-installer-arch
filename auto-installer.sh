@@ -92,9 +92,8 @@ echo "Entrando en el entorno chroot"
 arch-chroot /mnt /bin/bash <<EOF
 
 echo "Configurando el idioma"
-read -p "Introduce el código del idioma (por ejemplo, es): " language_code
-echo "KEYMAP=$language_code" > /etc/vconsole.conf
-echo "$language_code.UTF-8 UTF-8" >> /etc/locale.gen
+echo "KEYMAP=es_ES" > /etc/vconsole.conf
+echo "es_ES.UTF-8 UTF-8" >> /etc/locale.gen
 locale-gen
 echo "LANG=$language_code.UTF-8" > /etc/locale.conf
 
