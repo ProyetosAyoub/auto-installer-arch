@@ -76,8 +76,6 @@ mount "${disk}4" /mnt/home
 
 echo "Ya están montadas las particiones." 
 
-#!/bin/bash
-
 echo "Actualizando los repositorios y el keyring de Arch Linux"
 pacman -Sy archlinux-keyring
 
