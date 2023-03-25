@@ -7,7 +7,10 @@ if [[ $EUID -ne 0 ]]; then
 fi
 
 # Verificar la conexión a Internet
-ping -c 3 google.com
+if ! ping -c 3 google.com; then
+    echo "No se pudo establecer conexión a Internet."
+    exit 1
+fi
 
 # Configurar la distribución de teclado para España
 localectl set-keymap es
@@ -26,7 +29,7 @@ fi
 
 # Listar las particiones existentes en la unidad de disco especificada
 echo "Las siguientes particiones existen en la unidad de disco $disk_name:"
-fdisk -l $disk
+fdisk -l $disk || true # Ignorar errores
 
 # Solicitar la confirmación del usuario para continuar
 read -p "¿Deseas eliminar todas las particiones en la unidad de disco $disk_name y eliminar los formatos existentes? (y/n): " confirm
@@ -49,21 +52,21 @@ else
 fi
 
 # Crear partición para boot de 1GB
-echo -e "n\np\n1\n\n+1G\nt\n1\nw" | fdisk $disk
+echo -e "n\np\n1\n\n+1G\nt\n1\n82\nw" | fdisk $disk || true # Ignorar errores
 mkfs.ext4 "${disk}1"
 parted $disk set 1 boot on
 
 # Crear partición para swap de 2GB
-echo -e "n\np\n2\n\n+2G\nt\n2\nw" | fdisk $disk
+echo -e "n\np\n2\n\n+2G\n82\nw" | fdisk $disk || true # Ignorar errores
 mkswap "${disk}2"
 swapon "${disk}2"
 
 # Crear partición para raiz de 40GB
-echo -e "n\np\n3\n\n+40G\nw" | fdisk $disk
+echo -e "n\np\n3\n\n+40G\nw" | fdisk $disk || true # Ignorar errores
 mkfs.ext4 "${disk}3"
 
 # Crear partición para home con el resto del espacio disponible
-echo -e "n\np\n4\n\n\nw" | fdisk $disk
+echo -e "n\np\n4\n\n\nw" | fdisk $disk || true # Ignorar errores
 mkfs.ext4 "${disk}4"
 
 # Montar particiones
