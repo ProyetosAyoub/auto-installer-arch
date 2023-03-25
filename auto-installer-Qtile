@@ -1,0 +1,87 @@
+#!/bin/bash
+
+# Default packages are for the configuration and corresponding .config folders
+# Install packages after installing base Arch Linux with no GUI
+
+# Xorg display server installation
+sudo pacman -S xorg-server xorg-xinit xorg-xrandr xorg-xsetroot
+
+# INCLUDES make, etc.
+sudo pacman -S base-devel
+
+# Microcode for Intel/AMD
+sudo pacman -S intel-ucode
+
+# Network Manager
+sudo pacman -S networkmanager network-manager-applet
+
+# Installation for Appearance management
+sudo pacman -S lxappearance
+
+# File Manager (eg. pcmanfm, krusader, thunar)
+sudo pacman -S thunar
+
+# Network File Tools/System Events
+sudo pacman -S gvfs
+
+# Terminal (eg. terminator, kitty)
+sudo pacman -S xfce4-terminal
+
+# Sound packages
+sudo pacman -S pulseaudio pavucontrol volumeicon
+
+# Neofetch/HTOP
+sudo pacman -S neofetch htop
+
+# EXA installation
+# replace ls command in .bashrc file with line below
+# alias ls='exa -al --long --header --color=always --group-directories-first'
+sudo pacman -S exa
+
+# Printing and Bluetooth (if needed)
+# sudo pacman -S cups
+# sudo pacman -S bluez bluez-utils
+
+# sudo systemctl enable bluetooth
+# sudo systemctl enable org.cups.cupsd.service
+
+# Browser Installation (eg. chromium)
+sudo pacman -S firefox
+
+# Desktop background browser/handler
+# feh --bg-fill /path/to/directory
+# example if you want to use in autostart located in ~/.config/qtile/autostart.sh
+sudo pacman -S feh
+# sudo pacman -S nitrogen
+
+# Packages needed for Qtile after installation
+sudo pacman -S picom dunst sxhkd rofi libnotify unzip scrot geany
+
+# Command-line text editor -- nano preinstalled -- I like micro but vim is great
+sudo pacman -S micro
+# sudo pacman -S neovim
+
+# Install fonts and Papirus icon theme and arc-theme
+sudo pacman -S ttf-font-awesome ttf-ubuntu-font-family ttf-liberation ttf-dejavu papirus-icon-theme arc-gtk-theme
+
+# Create folders in user directory (eg. Documents, Downloads, etc.)
+xdg-user-dirs-update
+
+## Qtile install dependencies
+sudo pacman -S python-dbus
+pip3 install xcffib
+pip3 install --no-cache-dir cairocffi
+pip install psutil
+
+## Qtile install from Github
+cd
+git clone https://github.com/qtile/qtile
+cd qtile
+pip3 install .
+
+## Adding .xinitrc
+echo 'exec qtile' > ~/.xinitrc
+
+sudo pacman -Syyu
+
+printf "\e[1;32mDone! You can now reboot.\e[0m\n"
