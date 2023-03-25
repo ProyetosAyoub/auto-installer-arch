@@ -21,12 +21,12 @@ disk="/dev/${disk_name}"
 
 if ! [[ -b "$disk" ]]; then
   echo "El nombre de la unidad de disco introducido no es válido."
-  exit
+  exit 1
 fi
 
 # Listar las particiones existentes en la unidad de disco especificada
 echo "Las siguientes particiones existen en la unidad de disco $disk_name:"
-fdisk -l /dev/$disk_name
+fdisk -l $disk
 
 # Solicitar la confirmación del usuario para continuar
 read -p "¿Deseas eliminar todas las particiones en la unidad de disco $disk_name y eliminar los formatos existentes? (y/n): " confirm
@@ -34,22 +34,22 @@ if [ "$confirm" == "y" ]; then
     # Eliminar las particiones existentes
     echo "Eliminando particiones existentes..."
     for i in $(seq 1 4); do
-        parted $disk rm $i || true
+        parted -s $disk rm $i || true
     done
 
     # Eliminar los formatos existentes
     echo "Eliminando formatos existentes..."
     for i in $(seq 1 4); do
         wipefs -af ${disk}$i || true
-    echo "¡Listo!"
     done
+    echo "¡Listo!"
 else
     echo "Operación cancelada por el usuario."
     exit 1
 fi
 
 # Crear partición para boot de 1GB
-echo -e "n\np\n1\n\n+1G\nt\n82\nw" | fdisk $disk
+echo -e "n\np\n1\n\n+1G\nt\n1\nw" | fdisk $disk
 mkfs.ext4 "${disk}1"
 parted $disk set 1 boot on
 
