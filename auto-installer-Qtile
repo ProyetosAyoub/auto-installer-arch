@@ -1,87 +1,38 @@
 #!/bin/bash
 
-#Los paquetes predeterminados son para la configuración y las carpetas correspondientes .config
-#Instalar paquetes después de instalar Arch Linux base sin GUI
-#Instalación del servidor de visualización xorg
-sudo pacman -S xorg-server xorg-xinit --noconfirm
+# Install Xorg display server
+sudo pacman -S xorg-server xorg-xinit
 
-#Incluye make, etc.
-sudo pacman -S base-devel python-pip --noconfirm
+# Install Qtile dependencies
+sudo pacman -S libffi libxft libpangocairo-1.0 python-pip
 
-#Microcódigo para Intel/AMD
-sudo pacman -S amd-ucode --noconfirm
-sudo pacman -S intel-ucode --noconfirm
-
-#Network Manager
-sudo pacman -S networkmanager network-manager-applet --noconfirm
-
-#Instalación para la gestión de apariencia
-sudo pacman -S lxappearance --noconfirm
-
-#Administrador de archivos (ej. pcmanfm, krusader, thunar)
-sudo pacman -S thunar --noconfirm
-
-#Herramientas de archivos de red/eventos del sistema
-sudo pacman -S dialog mtools dosfstools avahi acpi acpid gvfs --noconfirm
-
-sudo systemctl enable avahi-daemon --noconfirm
-sudo systemctl enable acpid --noconfirm
-
-#Terminal (ej. terminator, kitty)
-sudo pacman -S xfce4-terminal --noconfirm
-
-#Paquetes de sonido
-sudo pacman -S pulseaudio alsa-utils pavucontrol volumeicon --noconfirm
-
-#Neofetch/HTOP
-sudo pacman -S neofetch htop --noconfirm
-
-#Instalación de EXA
-#Reemplace el comando "ls" en el archivo .bashrc con la línea a continuación
-alias ls='exa -al --long --header --color=always --group-directories-first'
-sudo pacman -S exa --noconfirm
-
-#Impresión y bluetooth (si es necesario)
-sudo pacman -S cups --noconfirm
-sudo pacman -S bluez blueman --noconfirm
-sudo systemctl enable bluetooth --noconfirm
-sudo systemctl enable cups --noconfirm
-#Instalación del navegador (ej. chromium)
-sudo pacman -S firefox --noconfirm
-
-#Navegador/controlador de fondo de escritorio
-feh --bg-fill /ruta/a/directorio
-#Ejemplo si desea usarlo en autostart ubicado en ~/.xinitrc
-sudo pacman -S feh --noconfirm
-
-sudo pacman -S nitrogen --noconfirm
-#Paquetes necesarios para Qtile después de la instalación
-sudo pacman -S picom dunst sxhkd rofi suckless-tools libnotify unzip scrot geany geany-plugins --noconfirm
-
-#Editor de texto en línea de comandos -- nano está preinstalado -- Me gusta micro pero vim es genial
-sudo pacman -S micro --noconfirm
-sudo pacman -S neovim --noconfirm
-#Instalación de fuentes y tema de iconos papirus y tema arc
-sudo pacman -S ttf-font-awesome ttf-ubuntu-font-family ttf-liberation terminus-font papirus-icon-theme arc-gtk-theme --noconfirm
-
-#Crear carpetas en el directorio de usuario (ej. Documents, Downloads, etc.)
-xdg-user-dirs-update
-
-#Qtile instala las dependencias
-sudo pacman -S python-dbus --noconfirm
+# Install Qtile
 pip install xcffib
-pip install --no-cache-dir cairocffi
-pip install psutil
+pip install --user qtile
 
-#Qtile instala desde github
-cd
-git clone https://github.com/qtile/qtile
-cd qtile
-pip install .
-pip install wheel
-#Añadiendo .xinitrc
-echo 'exec qtile' > ~/.xinitrc
+# Install other useful tools
+sudo pacman -S alsa-utils dunst feh git htop picom ranger rofi scrot ttf-dejavu xclip xdg-utils xfce4-terminal
 
-sudo pacman -Rs $(pacman -Qdtq) --noconfirm
+# Install a browser of your choice
+sudo pacman -S firefox
 
-echo "Ya esta todo instalado reinicia"
+# Install fonts and icon themes
+sudo pacman -S ttf-font-awesome papirus-icon-theme
+
+# Set default browser
+xdg-settings set default-web-browser firefox.desktop
+
+# Enable and start NetworkManager
+sudo systemctl enable NetworkManager
+sudo systemctl start NetworkManager
+
+# Install LightDM display manager
+sudo pacman -S lightdm lightdm-gtk-greeter
+
+# Enable LightDM service
+sudo systemctl enable lightdm.service
+
+# Create .xinitrc file
+echo "exec qtile" > ~/.xinitrc
+
+echo "Done! Reboot your system to start using Qtile."
