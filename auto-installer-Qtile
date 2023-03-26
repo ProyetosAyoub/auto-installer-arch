@@ -1,91 +1,87 @@
 #!/bin/bash
 
-# Default packages are for the configuration and corresponding .config folders
-# Install packages after installing base Arch Linux with no GUI
+#Los paquetes predeterminados son para la configuración y las carpetas correspondientes .config
+#Instalar paquetes después de instalar Arch Linux base sin GUI
+#Instalación del servidor de visualización xorg
+sudo pacman -S xorg-server xorg-xinit --noconfirm
 
-# xorg display server installation
-sudo pacman -S xorg-server xorg-xinit
+#Incluye make, etc.
+sudo pacman -S base-devel python-pip --noconfirm
 
-# INCLUDES make,etc.
-sudo pacman -S base-devel python-pip
+#Microcódigo para Intel/AMD
+sudo pacman -S amd-ucode --noconfirm
+sudo pacman -S intel-ucode --noconfirm
 
-# Microcode for Intel/AMD 
-# sudo pacman -S amd-ucode
-sudo pacman -S intel-ucode
+#Network Manager
+sudo pacman -S networkmanager network-manager-applet --noconfirm
 
-# Network Manager
-sudo pacman -S networkmanager network-manager-applet
+#Instalación para la gestión de apariencia
+sudo pacman -S lxappearance --noconfirm
 
-# Installation for Appearance management
-sudo pacman -S lxappearance 
+#Administrador de archivos (ej. pcmanfm, krusader, thunar)
+sudo pacman -S thunar --noconfirm
 
-# File Manager (eg. pcmanfm,krusader,thunar)
-sudo pacman -S thunar
+#Herramientas de archivos de red/eventos del sistema
+sudo pacman -S dialog mtools dosfstools avahi acpi acpid gvfs --noconfirm
 
-# Network File Tools/System Events
-sudo pacman -S dialog mtools dosfstools avahi acpi acpid gvfs
+sudo systemctl enable avahi-daemon --noconfirm
+sudo systemctl enable acpid --noconfirm
 
-sudo systemctl enable avahi-daemon
-sudo systemctl enable acpid
+#Terminal (ej. terminator, kitty)
+sudo pacman -S xfce4-terminal --noconfirm
 
-# Terminal (eg. terminator,kitty)
-sudo pacman -S xfce4-terminal
+#Paquetes de sonido
+sudo pacman -S pulseaudio alsa-utils pavucontrol volumeicon --noconfirm
 
-# Sound packages
-sudo pacman -S pulseaudio alsa-utils pavucontrol volumeicon
+#Neofetch/HTOP
+sudo pacman -S neofetch htop --noconfirm
 
-# Neofetch/HTOP
-sudo pacman -S neofetch htop
+#Instalación de EXA
+#Reemplace el comando "ls" en el archivo .bashrc con la línea a continuación
+alias ls='exa -al --long --header --color=always --group-directories-first'
+sudo pacman -S exa --noconfirm
 
-# EXA installation
-# replace ls command in .bashrc file with line below
-# alias ls='exa -al --long --header --color=always --group-directories-first' 
-sudo pacman -S exa
+#Impresión y bluetooth (si es necesario)
+sudo pacman -S cups --noconfirm
+sudo pacman -S bluez blueman --noconfirm
+sudo systemctl enable bluetooth --noconfirm
+sudo systemctl enable cups --noconfirm
+#Instalación del navegador (ej. chromium)
+sudo pacman -S firefox --noconfirm
 
-# Printing and bluetooth (if needed)
-# sudo pacman -S cups
-# sudo pacman -S bluez blueman
+#Navegador/controlador de fondo de escritorio
+feh --bg-fill /ruta/a/directorio
+#Ejemplo si desea usarlo en autostart ubicado en ~/.xinitrc
+sudo pacman -S feh --noconfirm
 
-# sudo systemctl enable bluetooth
-# sudo systemctl enable cups
+sudo pacman -S nitrogen --noconfirm
+#Paquetes necesarios para Qtile después de la instalación
+sudo pacman -S picom dunst sxhkd rofi suckless-tools libnotify unzip scrot geany geany-plugins --noconfirm
 
-# Browser Installation (eg. chromium)
-sudo pacman -S firefox 
+#Editor de texto en línea de comandos -- nano está preinstalado -- Me gusta micro pero vim es genial
+sudo pacman -S micro --noconfirm
+sudo pacman -S neovim --noconfirm
+#Instalación de fuentes y tema de iconos papirus y tema arc
+sudo pacman -S ttf-font-awesome ttf-ubuntu-font-family ttf-liberation terminus-font papirus-icon-theme arc-gtk-theme --noconfirm
 
-# Desktop background browser/handler 
-# feh --bg-fill /path/to/directory 
-# example if you want to use in autostart located in ~/.xinitrc
-sudo pacman -S feh
-# sudo pacman -S nitrogen 
-
-# Packages needed qtile after installation
-sudo pacman -S picom dunst sxhkd rofi suckless-tools libnotify unzip scrot geany geany-plugins
-
-# Command line text editor -- nano preinstalled  -- I like micro but vim is great
-sudo pacman -S micro
-# sudo pacman -S neovim
-
-# Install fonts and papirus icon theme and arc-theme
-sudo pacman -S ttf-font-awesome ttf-ubuntu-font-family ttf-liberation terminus-font papirus-icon-theme arc-gtk-theme
-
-# Create folders in user directory (eg. Documents,Downloads,etc.)
+#Crear carpetas en el directorio de usuario (ej. Documents, Downloads, etc.)
 xdg-user-dirs-update
 
-## Qtile install dependencies
-sudo pacman -S python-dbus
+#Qtile instala las dependencias
+sudo pacman -S python-dbus --noconfirm
 pip install xcffib
 pip install --no-cache-dir cairocffi
 pip install psutil
 
-## Qtile install from github
+#Qtile instala desde github
 cd
 git clone https://github.com/qtile/qtile
 cd qtile
 pip install .
 
-## adding .xinitrc
+#Añadiendo .xinitrc
 echo 'exec qtile' > ~/.xinitrc
 
-sudo pacman -Rs $(pacman -Qdtq)
+sudo pacman -Rs $(pacman -Qdtq) --noconfirm
 
-printf "\e[1;32mDone! you can now reboot.\e[0m\n"
+printf "\e[1;32m¡Hecho! Ahora
