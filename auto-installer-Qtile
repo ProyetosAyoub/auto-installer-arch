@@ -11,9 +11,8 @@ sudo pacman -S libxcb python-xcffib python-cairocffi libpqxx libpulse libmpdclie
 
 # Install pip for Python 3
 sudo pacman -S python-pip
-
 # Install qtile and dependencies with pip
-sudo pip install xcffib qtile psutil
+sudo pip3 install xcffib qtile psutil
 
 # Install LightDM display manager and greeter
 sudo pacman -S lightdm lightdm-gtk-greeter
