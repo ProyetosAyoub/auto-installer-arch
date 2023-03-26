@@ -41,6 +41,3 @@ echo "exec qtile" >> ~/.xinitrc
 
 # Allow LightDM to start Qtile
 echo "exec qtile" > ~/.xsession
-
-# Reboot system to finish installation
-sudo reboot
