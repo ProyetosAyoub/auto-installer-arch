@@ -3,23 +3,23 @@
 # Default packages are for the configuration and corresponding .config folders
 # Install packages after installing base Arch Linux with no GUI
 
-# xorg display server installation
+# Xorg display server installation
 sudo pacman -S xorg-server xorg-xinit
 
 # INCLUDES make,etc.
-sudo pacman -S base-devel
+sudo pacman -S base-devel python-pip
 
 # Microcode for Intel/AMD 
 # sudo pacman -S amd-ucode
-sudo pacman -S intel-ucode 
+sudo pacman -S intel-ucode
 
 # Network Manager
 sudo pacman -S networkmanager network-manager-applet
 
 # Installation for Appearance management
-sudo pacman -S lxappearance 
+sudo pacman -S lxappearance-gtk3
 
-# File Manager (eg. pcmanfm,krusader,thunar)
+# File Manager (eg. pcmanfm, krusader, thunar)
 sudo pacman -S thunar
 
 # Network File Tools/System Events
@@ -28,11 +28,11 @@ sudo pacman -S dialog mtools dosfstools avahi acpi acpid gvfs
 sudo systemctl enable avahi-daemon
 sudo systemctl enable acpid
 
-# Terminal (eg. terminator,kitty)
+# Terminal (eg. terminator, kitty)
 sudo pacman -S xfce4-terminal
 
 # Sound packages
-sudo pacman -S pulseaudio alsa-utils pavucontrol volumeicon-alsa
+sudo pacman -S pulseaudio alsa-utils pavucontrol
 
 # Neofetch/HTOP
 sudo pacman -S neofetch htop
@@ -42,49 +42,51 @@ sudo pacman -S neofetch htop
 # alias ls='exa -al --long --header --color=always --group-directories-first' 
 sudo pacman -S exa
 
-# Printing and bluetooth (if needed)
+# Printing and Bluetooth (if needed)
 # sudo pacman -S cups
 # sudo pacman -S bluez bluez-utils blueman
 
 # sudo systemctl enable bluetooth
 # sudo systemctl enable cups
 
-# Browser Installation (eg. chromium)
-sudo pacman -S firefox 
+# Browser Installation (eg. Chromium)
+sudo pacman -S firefox
 
 # Desktop background browser/handler 
 # feh --bg-fill /path/to/directory 
-# example if you want to use in autostart located in ~/.local/share/dwm/autostart.sh
+# example if you want to use in autostart located in ~/.xinitrc
 sudo pacman -S feh
 # sudo pacman -S nitrogen 
 
 # Packages needed for Qtile after installation
 sudo pacman -S picom dunst sxhkd rofi libnotify unzip scrot geany
 
-# Command line text editor -- nano preinstalled  -- I like micro but vim is great
+# Command line text editor -- nano preinstalled -- I like micro but vim is great
 sudo pacman -S micro
 # sudo pacman -S neovim
 
 # Install fonts and papirus icon theme and arc-theme
-sudo pacman -S ttf-font-awesome ttf-ubuntu-font-family ttf-liberation ttf-terminus papirus-icon-theme
+sudo pacman -S ttf-font-awesome ttf-ubuntu-font-family ttf-liberation ttf-dejavu papirus-icon-theme arc-gtk-theme
 
 # Create folders in user directory (eg. Documents,Downloads,etc.)
 xdg-user-dirs-update
 
 ## Qtile install dependencies
 sudo pacman -S python-dbus
-pip install xcffib
-pip install cairocffi
+pip3 install xcffib
+pip3 install --no-cache-dir cairocffi
 pip install psutil
 
 ## Qtile install from github
 cd
 git clone https://github.com/qtile/qtile
 cd qtile
-pip install .
+pip3 install .
 
-## adding .xinitrc
+## Adding .xinitrc
 echo 'exec qtile' > ~/.xinitrc
+
+sudo pacman -Rs $(pacman -Qtdq)
 
 # Installing and configuring lightdm
 sudo pacman -S lightdm lightdm-gtk-greeter
