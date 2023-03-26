@@ -78,10 +78,10 @@ cd
 git clone https://github.com/qtile/qtile
 cd qtile
 pip install .
-
+pip install wheel
 #Añadiendo .xinitrc
 echo 'exec qtile' > ~/.xinitrc
 
 sudo pacman -Rs $(pacman -Qdtq) --noconfirm
 
-printf "\e[1;32m¡Hecho! Ahora
+echo "Ya esta todo instalado reinicia"
