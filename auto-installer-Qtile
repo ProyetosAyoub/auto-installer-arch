@@ -9,8 +9,9 @@ sudo pacman -S xorg xorg-xinit
 # Install necessary packages for Qtile
 sudo pacman -S libxcb python-xcffib python-cairocffi libpqxx libpulse libmpdclient libnotify jsoncpp
 
-# Install pip for Python 3
-sudo pacman -S python-pip
+# Install pip for Python 3 and dependencies
+sudo pacman -S python-pip base-devel openssl zlib xz
+
 # Install qtile and dependencies with pip
 sudo pip3 install xcffib qtile psutil
 
