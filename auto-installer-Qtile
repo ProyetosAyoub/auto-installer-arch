@@ -92,5 +92,3 @@ sudo systemctl enable lightdm.service
 localectl set-keymap es
 # Rebooting the system
 printf "\e[1;32mDone! Rebooting the system in 5 seconds...\e[0m\n"
-sleep 5
-sudo reboot now
