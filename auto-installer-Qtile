@@ -1,38 +1,46 @@
 #!/bin/bash
 
-# Install Xorg display server
-sudo pacman -S xorg-server xorg-xinit
+# Update and upgrade packages
+sudo pacman -Syu
 
-# Install Qtile dependencies
-sudo pacman -S libffi libxft libpangocairo-1.0 python-pip
+# Install xorg display server and xinit
+sudo pacman -S xorg xorg-xinit
 
-# Install Qtile
-pip install xcffib
-pip install --user qtile
+# Install necessary packages for Qtile
+sudo pacman -S libxcb python-xcffib python-cairocffi libpqxx libpulse libmpdclient libnotify jsoncpp
 
-# Install other useful tools
-sudo pacman -S alsa-utils dunst feh git htop picom ranger rofi scrot ttf-dejavu xclip xdg-utils xfce4-terminal
+# Install pip for Python 3
+sudo pacman -S python-pip
 
-# Install a browser of your choice
-sudo pacman -S firefox
+# Install qtile and dependencies with pip
+sudo pip install xcffib qtile psutil
 
-# Install fonts and icon themes
-sudo pacman -S ttf-font-awesome papirus-icon-theme
-
-# Set default browser
-xdg-settings set default-web-browser firefox.desktop
-
-# Enable and start NetworkManager
-sudo systemctl enable NetworkManager
-sudo systemctl start NetworkManager
-
-# Install LightDM display manager
+# Install LightDM display manager and greeter
 sudo pacman -S lightdm lightdm-gtk-greeter
 
 # Enable LightDM service
 sudo systemctl enable lightdm.service
 
-# Create .xinitrc file
-echo "exec qtile" > ~/.xinitrc
+# Install a terminal emulator (example: alacritty)
+sudo pacman -S alacritty
 
-echo "Done! Reboot your system to start using Qtile."
+# Install file manager (example: pcmanfm)
+sudo pacman -S pcmanfm
+
+# Install network manager and applet
+sudo pacman -S networkmanager network-manager-applet
+
+# Install sound packages
+sudo pacman -S pulseaudio pulseaudio-alsa pavucontrol
+
+# Install additional packages for customization
+sudo pacman -S feh lxappearance arc-gtk-theme papirus-icon-theme picom dunst rofi nitrogen exa htop
+
+# Set up autostart file for Qtile
+echo "exec qtile" >> ~/.xinitrc
+
+# Allow LightDM to start Qtile
+echo "exec qtile" > ~/.xsession
+
+# Reboot system to finish installation
+sudo reboot
