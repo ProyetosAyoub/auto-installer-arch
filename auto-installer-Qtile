@@ -2,12 +2,6 @@
 
 pacman -S lightdm lightdm-gtk-greeter
 
-echo "Ahora que tienes todo instalado configura el siguiente archivo"
-sudo nano /etc/lightdm/lightdm.conf
-echo "Comprueba que hayas cambiado de exampla a light en greeter-session y tambien de gnome a greeter"
-
-systemctl enable lightdm.service
-
 sudo pacman -S qtile xterm code firefox rofi which nitrogen
 
 sudo pacman -S ttf-dejavu ttf-liberation noto-fonts
@@ -16,4 +10,10 @@ sudo pacman -S pulseaudio pavucontrol pamixer
 
 sudo pacman -S arandr udiskie ntfs-3g network-manager-applet
 
-sudo pacman -S volumeicon cbtticon xorg-xinit base-devel git thunar ranger glib2 gvfs lxappear picom geeqie vlc
+sudo pacman -S volumeicon cbtticon xorg-xinit base-devel git thunar ranger glib2 gvfs lxappearance picom geeqie vlc
+
+echo "Ahora que tienes todo instalado configura el siguiente archivo"
+sudo nano /etc/lightdm/lightdm.conf
+echo "Comprueba que hayas cambiado de exampla a light en greeter-session y tambien de gnome a greeter"
+
+systemctl enable lightdm.service
