@@ -1,43 +1,19 @@
 #!/bin/bash
 
-# Update and upgrade packages
-sudo pacman -Syu
+pacman -S lightdm lightdm-gtk-greeter
 
-# Install xorg display server and xinit
-sudo pacman -S xorg xorg-xinit
+echo "Ahora que tienes todo instalado configura el siguiente archivo"
+sudo nano /etc/lightdm/lightdm.conf
+echo "Comprueba que hayas cambiado de exampla a light en greeter-session y tambien de gnome a greeter"
 
-# Install necessary packages for Qtile
-sudo pacman -S libxcb python-xcffib python-cairocffi libpqxx libpulse libmpdclient libnotify jsoncpp
+systemctl enable lightdm.service
 
-# Install pip for Python 3 and dependencies
-sudo pacman -S python-pip base-devel openssl zlib xz
+sudo pacman -S qtile xterm code firefox rofi which nitrogen
 
-# Install qtile and dependencies with pip
-sudo pip3 install xcffib qtile psutil
+sudo pacman -S ttf-dejavu ttf-liberation noto-fonts
 
-# Install LightDM display manager and greeter
-sudo pacman -S lightdm lightdm-gtk-greeter
+sudo pacman -S pulseaudio pavucontrol pamixer
 
-# Enable LightDM service
-sudo systemctl enable lightdm.service
+sudo pacman -S aradn udiskie ntfs-3g network-manager-applet
 
-# Install a terminal emulator (example: alacritty)
-sudo pacman -S alacritty
-
-# Install file manager (example: pcmanfm)
-sudo pacman -S pcmanfm
-
-# Install network manager and applet
-sudo pacman -S networkmanager network-manager-applet
-
-# Install sound packages
-sudo pacman -S pulseaudio pulseaudio-alsa pavucontrol
-
-# Install additional packages for customization
-sudo pacman -S feh lxappearance arc-gtk-theme papirus-icon-theme picom dunst rofi nitrogen exa htop
-
-# Set up autostart file for Qtile
-echo "exec qtile" >> ~/.xinitrc
-
-# Allow LightDM to start Qtile
-echo "exec qtile" > ~/.xsession
+sudo pacma n-S volumeicon cbtticon xorg-xinit base-devel git thunar ranger glib2 gvfs lxappear picom geeqie vlc
