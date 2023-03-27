@@ -1,6 +1,6 @@
 #!/bin/bash
 
-pacman -S lightdm lightdm-gtk-greeter
+sudo pacman -S lightdm lightdm-gtk-greeter
 
 sudo pacman -S qtile xterm code firefox rofi which nitrogen
 
