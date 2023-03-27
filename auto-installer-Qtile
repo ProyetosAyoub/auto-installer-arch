@@ -14,6 +14,6 @@ sudo pacman -S ttf-dejavu ttf-liberation noto-fonts
 
 sudo pacman -S pulseaudio pavucontrol pamixer
 
-sudo pacman -S aradn udiskie ntfs-3g network-manager-applet
+sudo pacman -S arandr udiskie ntfs-3g network-manager-applet
 
-sudo pacma n-S volumeicon cbtticon xorg-xinit base-devel git thunar ranger glib2 gvfs lxappear picom geeqie vlc
+sudo pacman -S volumeicon cbtticon xorg-xinit base-devel git thunar ranger glib2 gvfs lxappear picom geeqie vlc
