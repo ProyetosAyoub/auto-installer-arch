@@ -16,4 +16,6 @@ echo "Ahora que tienes todo instalado configura el siguiente archivo"
 sudo nano /etc/lightdm/lightdm.conf
 echo "Comprueba que hayas cambiado de exampla a light en greeter-session y tambien de gnome a greeter"
 
-systemctl enable lightdm.service
+sudo systemctl enable lightdm.service
+
+echo "Recuerda que tienes todo apuntado porque no hay vuelta atras. Suerte soldado"
