@@ -14,7 +14,7 @@ sudo pacman -S volumeicon cbtticon xorg-xinit base-devel git thunar ranger glib2
 
 echo "Ahora que tienes todo instalado configura el siguiente archivo"
 sudo nano /etc/lightdm/lightdm.conf
-echo "Comprueba que hayas cambiado de exampla a light en greeter-session y tambien de gnome a greeter"
+echo "Comprueba que hayas cambiado de exampla a lightdm en greeter-session y tambien de gnome a greeter"
 
 sudo systemctl enable lightdm.service
 
