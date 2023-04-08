@@ -1,21 +1,42 @@
 #!/bin/bash
 
-sudo pacman -S lightdm lightdm-gtk-greeter
+# Instala los paquetes necesarios
+install_packages() {
+  sudo pacman -S "$@"
+  if [ $? -ne 0 ]; then
+    echo "Error: No se pudo instalar $@"
+    exit 1
+  fi
+}
 
-sudo pacman -S qtile xterm code firefox rofi which nitrogen
+# Variables con los paquetes a instalar
+greeter_packages="lightdm lightdm-gtk-greeter"
+apps_packages="qtile xterm code firefox rofi which nitrogen"
+fonts_packages="ttf-dejavu ttf-liberation noto-fonts"
+audio_packages="pulseaudio pavucontrol pamixer"
+utils_packages="arandr udiskie ntfs-3g network-manager-applet volumeicon cbtticon xorg-xinit base-devel git thunar ranger glib2 gvfs lxappearance picom geeqie vlc"
 
-sudo pacman -S ttf-dejavu ttf-liberation noto-fonts
+# Instala los paquetes
+install_packages $greeter_packages
+install_packages $apps_packages
+install_packages $fonts_packages
+install_packages $audio_packages
+install_packages $utils_packages
 
-sudo pacman -S pulseaudio pavucontrol pamixer
+# Pide al usuario que configure el archivo lightdm.conf
+cat << EOF
+Ahora que tienes todo instalado configura el siguiente archivo:
+    sudo nano /etc/lightdm/lightdm.conf
+Comprueba que hayas cambiado de exampla a lightdm en greeter-session y tambien de gnome a greeter
+EOF
 
-sudo pacman -S arandr udiskie ntfs-3g network-manager-applet
+# Comprueba que el usuario tiene permisos de sudo
+if ! sudo -v; then
+  echo "Error: No tienes permisos de sudo"
+  exit 1
+fi
 
-sudo pacman -S volumeicon cbtticon xorg-xinit base-devel git thunar ranger glib2 gvfs lxappearance picom geeqie vlc
-
-echo "Ahora que tienes todo instalado configura el siguiente archivo"
-sudo nano /etc/lightdm/lightdm.conf
-echo "Comprueba que hayas cambiado de exampla a lightdm en greeter-session y tambien de gnome a greeter"
-
+# Habilita el servicio de lightdm
 sudo systemctl enable lightdm.service
 
-echo "Recuerda que tienes todo apuntado porque no hay vuelta atras. Suerte soldado"
+echo "Recuerda que tienes todo apuntado porque no hay vuelta atras. Suerte soldado" 
