@@ -18,13 +18,33 @@ localectl set-keymap es
 # Verificar la hora
 timedatectl set-ntp true
 
-# Verificar si la unidad de disco es la correcta (/dev/sda en este caso)
-read -p "Introduce el nombre de la unidad de disco en la que deseas realizar las operaciones (ejemplo: sda): " disk_name
+#!/bin/bash
+
+# Salir automáticamente si ocurre un error
+set -e
+
+# Función para validar la entrada del usuario
+function validar_respuesta {
+    read -p "¿Deseas eliminar todas las particiones en la unidad de disco $disk_name y eliminar los formatos existentes? (y/n): " respuesta
+    while [[ ! "$respuesta" =~ ^[yn]$ ]]; do
+        read -p "Por favor, ingresa 'y' para confirmar o 'n' para cancelar: " respuesta
+    done
+    echo "$respuesta"
+}
+
+# Comprobación de existencia de comandos
+command -v parted >/dev/null 2>&1 || { echo >&2 "El comando 'parted' no está instalado. Abortando."; exit 1; }
+command -v fdisk >/dev/null 2>&1 || { echo >&2 "El comando 'fdisk' no está instalado. Abortando."; exit 1; }
+command -v mkfs.ext4 >/dev/null 2>&1 || { echo >&2 "El comando 'mkfs.ext4' no está instalado. Abortando."; exit 1; }
+
+# Solicitar al usuario que ingrese el nombre del disco
+read -p "Por favor, ingresa el nombre de la unidad de disco en la que deseas realizar las operaciones (ejemplo: sda): " disk_name
 disk="/dev/${disk_name}"
 
-if ! [[ -b "$disk" ]]; then
-  echo "El nombre de la unidad de disco introducido no es válido."
-  exit 1
+# Verificar si el disco existe y es una unidad de disco válida
+if [ ! -b "$disk" ]; then
+    echo "El nombre de la unidad de disco introducido no es válido o no existe."
+    exit 1
 fi
 
 # Listar las particiones existentes en la unidad de disco especificada
@@ -32,42 +52,41 @@ echo "Las siguientes particiones existen en la unidad de disco $disk_name:"
 fdisk -l $disk || true # Ignorar errores
 
 # Solicitar la confirmación del usuario para continuar
-read -p "¿Deseas eliminar todas las particiones en la unidad de disco $disk_name y eliminar los formatos existentes? (y/n): " confirm
-if [ "$confirm" == "y" ]; then
-    # Eliminar las particiones existentes
-    echo "Eliminando particiones existentes..."
-    for i in $(seq 1 4); do
-        parted -s $disk rm $i || true
-    done
+confirm=$(validar_respuesta)
 
-    # Eliminar los formatos existentes
-    echo "Eliminando formatos existentes..."
-    for i in $(seq 1 4); do
-        wipefs -af ${disk}$i || true
-    done
+if [ "$confirm" == "y" ]; then
+    # Eliminar las particiones existentes con parted
+    echo "Eliminando particiones existentes..."
+    parted -s $disk mklabel gpt # Crear una nueva tabla de particiones GPT
+
     echo "¡Listo!"
 else
     echo "Operación cancelada por el usuario."
     exit 1
 fi
 
+# Buscar los UUIDs de las particiones después de crearlas y formatearlas
+uuid_boot=$(lsblk -no UUID ${disk}1)
+uuid_swap=$(lsblk -no UUID ${disk}2)
+uuid_root=$(lsblk -no UUID ${disk}3)
+uuid_home=$(lsblk -no UUID ${disk}4)
+
 # Crear partición para boot de 1GB
-echo -e "n\np\n1\n\n+1G\nt\n1\n82\nw" | fdisk $disk || true # Ignorar errores
-mkfs.ext4 "${disk}1"
-parted $disk set 1 boot on
+echo -e "n\np\n1\n\n+1G\nt\n1\n82\nw" | fdisk $disk # Intentar crear partición y formatearla como swap
+mkfs.ext4 UUID="${uuid_boot}"
 
 # Crear partición para swap de 2GB
-echo -e "n\np\n2\n\n+2G\n82\nw" | fdisk $disk || true # Ignorar errores
-mkswap "${disk}2"
-swapon "${disk}2"
+echo -e "n\np\n2\n\n+2G\n82\nw" | fdisk $disk # Intentar crear partición y formatearla como swap
+mkswap UUID="${uuid_swap}"
+swapon UUID="${uuid_swap}"
 
-# Crear partición para raiz de 40GB
-echo -e "n\np\n3\n\n+40G\nw" | fdisk $disk || true # Ignorar errores
-mkfs.ext4 "${disk}3"
+# Crear partición para raíz de 40GB
+echo -e "n\np\n3\n\n+40G\nw" | fdisk $disk # Intentar crear partición y formatearla como ext4
+mkfs.ext4 UUID="${uuid_root}"
 
 # Crear partición para home con el resto del espacio disponible
-echo -e "n\np\n4\n\n\nw" | fdisk $disk || true # Ignorar errores
-mkfs.ext4 "${disk}4"
+echo -e "n\np\n4\n\n\nw" | fdisk $disk # Intentar crear partición y formatearla como ext4
+mkfs.ext4 UUID="${uuid_home}"
 
 # Montar particiones
 mount "${disk}3" /mnt
@@ -75,6 +94,9 @@ mkdir /mnt/boot /mnt/var
 mount "${disk}1" /mnt/boot
 mkdir /mnt/home
 mount "${disk}4" /mnt/home
+
+echo "Las particiones han sido creadas y montadas correctamente."
+
 
 echo "Ya están montadas las particiones."
 
