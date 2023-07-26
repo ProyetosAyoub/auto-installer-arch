@@ -18,8 +18,6 @@ localectl set-keymap es
 # Verificar la hora
 timedatectl set-ntp true
 
-#!/bin/bash
-
 # Salir automáticamente si ocurre un error
 set -e
 
