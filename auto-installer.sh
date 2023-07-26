@@ -95,7 +95,6 @@ mount "${disk}4" /mnt/home
 
 echo "Las particiones han sido creadas y montadas correctamente."
 
-
 echo "Ya están montadas las particiones."
 
 echo "Actualizando los repositorios y el keyring de Arch Linux"
@@ -105,7 +104,23 @@ echo "Instalando el sistema base de Arch Linux"
 pacstrap /mnt base linux linux-firmware
 
 echo "Instalando paquetes adicionales para el sistema base"
-pacstrap /mnt base-devel nano grub dhcpcd networkmanager sudo
+packages=("base-devel" "nano" "grub" "dhcpcd" "networkmanager" "sudo")
+while true; do
+    echo "Paquetes disponibles para instalar:"
+    for ((i=0; i<${#packages[@]}; i++)); do
+        echo "$i. ${packages[$i]}"
+    done
+
+    read -p "Seleccione un paquete para instalar (o 'q' para salir): " choice
+    if [ "$choice" = "q" ]; then
+        break
+    elif [ "$choice" -ge 0 ] && [ "$choice" -lt ${#packages[@]} ]; then
+        pacstrap /mnt "${packages[$choice]}"
+        echo "Paquete ${packages[$choice]} instalado correctamente."
+    else
+        echo "Selección inválida. Inténtelo de nuevo."
+    fi
+done
 
 echo "Generando el archivo fstab"
 genfstab -U /mnt >> /mnt/etc/fstab
