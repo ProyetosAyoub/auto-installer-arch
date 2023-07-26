@@ -63,28 +63,28 @@ else
     exit 1
 fi
 
+# Crear partición para boot de 1GB
+echo -e "n\np\n1\n\n+1G\nt\n1\n82\nw" | fdisk $disk # Intentar crear partición y formatearla como swap
+mkfs.ext4 -F "${disk}1" # -F para forzar el formateo sin preguntar
+
+# Crear partición para swap de 2GB
+echo -e "n\np\n2\n\n+2G\n82\nw" | fdisk $disk # Intentar crear partición y formatearla como swap
+mkswap "${disk}2"
+swapon "${disk}2"
+
+# Crear partición para raíz de 40GB
+echo -e "n\np\n3\n\n+40G\nw" | fdisk $disk # Intentar crear partición y formatearla como ext4
+mkfs.ext4 -F "${disk}3" # -F para forzar el formateo sin preguntar
+
+# Crear partición para home con el resto del espacio disponible
+echo -e "n\np\n4\n\n\nw" | fdisk $disk # Intentar crear partición y formatearla como ext4
+mkfs.ext4 -F "${disk}4" # -F para forzar el formateo sin preguntar
+
 # Buscar los UUIDs de las particiones después de crearlas y formatearlas
 uuid_boot=$(lsblk -no UUID ${disk}1)
 uuid_swap=$(lsblk -no UUID ${disk}2)
 uuid_root=$(lsblk -no UUID ${disk}3)
 uuid_home=$(lsblk -no UUID ${disk}4)
-
-# Crear partición para boot de 1GB
-echo -e "n\np\n1\n\n+1G\nt\n1\n82\nw" | fdisk $disk # Intentar crear partición y formatearla como swap
-mkfs.ext4 UUID="${uuid_boot}"
-
-# Crear partición para swap de 2GB
-echo -e "n\np\n2\n\n+2G\n82\nw" | fdisk $disk # Intentar crear partición y formatearla como swap
-mkswap UUID="${uuid_swap}"
-swapon UUID="${uuid_swap}"
-
-# Crear partición para raíz de 40GB
-echo -e "n\np\n3\n\n+40G\nw" | fdisk $disk # Intentar crear partición y formatearla como ext4
-mkfs.ext4 UUID="${uuid_root}"
-
-# Crear partición para home con el resto del espacio disponible
-echo -e "n\np\n4\n\n\nw" | fdisk $disk # Intentar crear partición y formatearla como ext4
-mkfs.ext4 UUID="${uuid_home}"
 
 # Montar particiones
 mount "${disk}3" /mnt
