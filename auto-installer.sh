@@ -148,7 +148,7 @@ echo "Configurando el gestor de red";
 systemctl enable NetworkManager.service;
 echo "Configurando el gestor de arranque GRUB";
 read -p "Introduce el dispositivo donde instalar GRUB (por ejemplo, /dev/sda): " device;
-grub-install --target=i386-pc $device;
+grub-install $device;
 grub-mkconfig -o /boot/grub/grub.cfg;
 mkinitcpio -P linux;
 echo "Creando un usuario nuevo";
