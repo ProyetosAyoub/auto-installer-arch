@@ -88,44 +88,24 @@ uuid_home=$(lsblk -no UUID ${disk}4)
 
 # Montar particiones
 mount "${disk}3" /mnt
-mkdir /mnt/boot /mnt/var
+mkdir -p /mnt/boot /mnt/var /mnt/home
 mount "${disk}1" /mnt/boot
-mkdir /mnt/home
 mount "${disk}4" /mnt/home
 
-echo "Las particiones han sido creadas y montadas correctamente."
+echo "Particiones montadas correctamente."
 
-echo "Ya están montadas las particiones."
-
-echo "Actualizando los repositorios y el keyring de Arch Linux"
+# Actualizar repositorios y keyring
 pacman -Sy archlinux-keyring
 
-echo "Instalando el sistema base de Arch Linux"
-pacstrap /mnt base linux linux-firmware
+# Instalar sistema base y paquetes adicionales
+pacstrap /mnt base linux linux-firmware base-devel nano grub dhcpcd networkmanager sudo grub-bios
 
-echo "Instalando paquetes adicionales para el sistema base"
-packages=("base-devel" "nano" "grub" "dhcpcd" "networkmanager" "sudo" "grub-bios")
-while true; do
-    echo "Paquetes disponibles para instalar:"
-    for ((i=0; i<${#packages[@]}; i++)); do
-        echo "$i. ${packages[$i]}"
-    done
+echo "Paquetes instalados correctamente."
 
-    read -p "Seleccione un paquete para instalar (o 'q' para salir): " choice
-    if [ "$choice" = "q" ]; then
-        break
-    elif [ "$choice" -ge 0 ] && [ "$choice" -lt ${#packages[@]} ]; then
-        pacstrap /mnt "${packages[$choice]}"
-        echo "Paquete ${packages[$choice]} instalado correctamente."
-    else
-        echo "Selección inválida. Inténtelo de nuevo."
-    fi
-done
-
-echo "Generando el archivo fstab"
+# Generar el archivo fstab
 genfstab -U /mnt >> /mnt/etc/fstab
 
-echo "Entrando en el entorno chroot"
+# Entrar en el entorno chroot
 arch-chroot /mnt /bin/bash -c '
 echo "Configurando el idioma";
 read -p "Introduce el código del idioma (por ejemplo, es_ES): " language_code;
@@ -135,7 +115,7 @@ locale-gen;
 echo "LANG=$language_code.UTF-8" > /etc/locale.conf;
 echo "Configurando la zona horaria";
 read -p "Introduce la zona horaria (por ejemplo, Europe/Madrid): " timezone;
-ln -sf /usr/share/zoneinfo/$timezone /etc/localtime;
+ln -sf "/usr/share/zoneinfo/$timezone" /etc/localtime;
 echo "Configurando el nombre del equipo";
 read -p "Introduce el nombre del equipo: " hostname;
 echo "$hostname" > /etc/hostname;
@@ -148,12 +128,12 @@ echo "Configurando el gestor de red";
 systemctl enable NetworkManager.service;
 echo "Configurando el gestor de arranque GRUB";
 read -p "Introduce el dispositivo donde instalar GRUB (por ejemplo, /dev/sda): " device;
-grub-install --target=i386-pc $device;
+grub-install --target=i386-pc "$device";
 grub-mkconfig -o /boot/grub/grub.cfg;
 mkinitcpio -P linux;
 echo "Creando un usuario nuevo";
 read -p "Introduce el nombre de usuario que deseas crear: " username;
-useradd -m -G wheel -s /bin/bash $username;
+useradd -m -G wheel -s /bin/bash "$username";
 while true; do
     read -s -p "Introduce la contraseña para $username: " password;
     echo
@@ -172,6 +152,5 @@ echo "$username ALL=(ALL) ALL" >> /etc/sudoers
 echo "Saliendo del entorno chroot"
 
 umount -R /mnt
-
 echo "¡La instalación se ha completado con éxito! Reinicia tu sistema y disfruta de tu nuevo sistema Arch Linux."
 
