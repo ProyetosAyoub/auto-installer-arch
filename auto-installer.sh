@@ -104,7 +104,7 @@ echo "Instalando el sistema base de Arch Linux"
 pacstrap /mnt base linux linux-firmware
 
 echo "Instalando paquetes adicionales para el sistema base"
-packages=("base-devel" "nano" "grub" "dhcpcd" "networkmanager" "sudo")
+packages=("base-devel" "nano" "grub" "dhcpcd" "networkmanager" "sudo" "grub-bios")
 while true; do
     echo "Paquetes disponibles para instalar:"
     for ((i=0; i<${#packages[@]}; i++)); do
