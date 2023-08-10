@@ -63,21 +63,23 @@ else
     exit 1
 fi
 
+disk="/dev/sda" # Cambia esto según tu disco específico
+
 # Crear partición para boot de 1GB
-echo -e "n\np\n1\n\n+1G\nt\n1\n82\nw" | fdisk $disk # Intentar crear partición y formatearla como swap
+echo -e "n\np\n1\n\n+1G\nt\n1\n83\nw" | fdisk $disk
 mkfs.ext4 -F "${disk}1" # -F para forzar el formateo sin preguntar
 
 # Crear partición para swap de 2GB
-echo -e "n\np\n2\n\n+2G\n82\nw" | fdisk $disk # Intentar crear partición y formatearla como swap
+echo -e "n\np\n2\n\n+2G\n82\nw" | fdisk $disk
 mkswap "${disk}2"
 swapon "${disk}2"
 
 # Crear partición para raíz de 40GB
-echo -e "n\np\n3\n\n+40G\nw" | fdisk $disk # Intentar crear partición y formatearla como ext4
+echo -e "n\np\n3\n\n+40G\n83\nw" | fdisk $disk
 mkfs.ext4 -F "${disk}3" # -F para forzar el formateo sin preguntar
 
 # Crear partición para home con el resto del espacio disponible
-echo -e "n\np\n4\n\n\nw" | fdisk $disk # Intentar crear partición y formatearla como ext4
+echo -e "n\np\n4\n\n\n83\nw" | fdisk $disk
 mkfs.ext4 -F "${disk}4" # -F para forzar el formateo sin preguntar
 
 # Buscar los UUIDs de las particiones después de crearlas y formatearlas
