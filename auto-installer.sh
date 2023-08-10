@@ -105,26 +105,50 @@ echo "Paquetes instalados correctamente."
 # Generar el archivo fstab
 genfstab -U /mnt >> /mnt/etc/fstab
 
-# Entrar en el entorno chroot
+echo "Entrando en el entorno chroot"
 arch-chroot /mnt /bin/bash -c '
 echo "Configurando el idioma";
-# ... (configuraciones anteriores)
-
-# Configurando GRUB
+read -p "Introduce el código del idioma (por ejemplo, es_ES): " language_code;
+echo "KEYMAP=$language_code" > /etc/vconsole.conf;
+echo "$language_code.UTF-8 UTF-8" >> /etc/locale.gen;
+locale-gen;
+echo "LANG=$language_code.UTF-8" > /etc/locale.conf;
+echo "Configurando la zona horaria";
+read -p "Introduce la zona horaria (por ejemplo, Europe/Madrid): " timezone;
+ln -sf /usr/share/zoneinfo/$timezone /etc/localtime;
+echo "Configurando el nombre del equipo";
+read -p "Introduce el nombre del equipo: " hostname;
+echo "$hostname" > /etc/hostname;
+echo "Configurando el archivo hosts";
+read -p "Introduce la dirección IP (por ejemplo, 127.0.0.1): " ip_address;
+echo "$ip_address    localhost" >> /etc/hosts;
+echo "::1    localhost" >> /etc/hosts;
+echo "$ip_address    $hostname.localdomain    $hostname" >> /etc/hosts;
+echo "Configurando el gestor de red";
+systemctl enable NetworkManager.service;
 echo "Configurando el gestor de arranque GRUB";
 read -p "Introduce el dispositivo donde instalar GRUB (por ejemplo, /dev/sda): " device;
-grub-install --target=i386-pc "$device";
-
-# Habilitando os-prober y regenerando la configuración de GRUB
-echo "Habilitando os-prober y regenerando la configuración de GRUB";
-sed -i 's/GRUB_DISABLE_OS_PROBER=true/GRUB_DISABLE_OS_PROBER=false/' /etc/default/grub;
+grub-install --target=i386-pc $device;
 grub-mkconfig -o /boot/grub/grub.cfg;
 mkinitcpio -P linux;
-
-# Creando un usuario nuevo
 echo "Creando un usuario nuevo";
-# ... (resto del script)
+read -p "Introduce el nombre de usuario que deseas crear: " username;
+useradd -m -G wheel -s /bin/bash $username;
+while true; do
+    read -s -p "Introduce la contraseña para $username: " password;
+    echo
+    read -s -p "Vuelve a introducir la contraseña: " password2
+    echo
+    if [ "$password" = "$password2" ]; then
+        echo "$username:$password" | chpasswd
+        break
+    else
+        echo "Las contraseñas no coinciden. Inténtalo de nuevo.";
+    fi
+done
+echo "$username ALL=(ALL) ALL" >> /etc/sudoers
 '
+
 echo "Saliendo del entorno chroot"
 
 umount -R /mnt
