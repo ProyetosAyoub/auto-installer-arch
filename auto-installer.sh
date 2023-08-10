@@ -68,8 +68,8 @@ fi
 
 disk="/dev/sda" # Cambia esto según tu disco específico
 
-# Crear partición para boot de 1GB
-echo -e "n\np\n1\n\n+1G\n83\nw" | fdisk $disk
+# Crear partición para boot de 1GB y activar bandera de arranque
+echo -e "n\np\n1\n\n+1G\n83\na\n1\nw" | fdisk $disk
 mkfs.ext4 -F "${disk}1" # -F para forzar el formateo sin preguntar
 
 # Crear partición para swap de 2GB
