@@ -99,6 +99,7 @@ mount "${disk}4" /mnt/home
 
 echo "Particiones montadas correctamente."
 
+
 # Actualizar repositorios y keyring
 pacman -Sy archlinux-keyring
 
