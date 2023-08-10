@@ -98,7 +98,7 @@ echo "Particiones montadas correctamente."
 pacman -Sy archlinux-keyring
 
 # Instalar sistema base y paquetes adicionales
-pacstrap /mnt base linux linux-firmware base-devel nano grub dhcpcd networkmanager sudo grub-bios
+pacstrap /mnt base linux linux-firmware base-devel nano grub dhcpcd networkmanager sudo
 
 echo "Paquetes instalados correctamente."
 
@@ -126,11 +126,15 @@ echo "::1    localhost" >> /etc/hosts;
 echo "$ip_address    $hostname.localdomain    $hostname" >> /etc/hosts;
 echo "Configurando el gestor de red";
 systemctl enable NetworkManager.service;
+
+# Configurando GRUB
 echo "Configurando el gestor de arranque GRUB";
 read -p "Introduce el dispositivo donde instalar GRUB (por ejemplo, /dev/sda): " device;
 grub-install --target=i386-pc "$device";
 grub-mkconfig -o /boot/grub/grub.cfg;
 mkinitcpio -P linux;
+
+# Creando un usuario nuevo
 echo "Creando un usuario nuevo";
 read -p "Introduce el nombre de usuario que deseas crear: " username;
 useradd -m -G wheel -s /bin/bash "$username";
@@ -146,11 +150,12 @@ while true; do
         echo "Las contraseñas no coinciden. Inténtalo de nuevo.";
     fi
 done
-echo "$username ALL=(ALL) ALL" >> /etc/sudoers
+echo "$username ALL=(ALL) ALL" >> /etc/sudoers;
 '
 
 echo "Saliendo del entorno chroot"
 
 umount -R /mnt
+
 echo "¡La instalación se ha completado con éxito! Reinicia tu sistema y disfruta de tu nuevo sistema Arch Linux."
 
