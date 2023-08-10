@@ -53,9 +53,12 @@ fdisk -l $disk || true # Ignorar errores
 confirm=$(validar_respuesta)
 
 if [ "$confirm" == "y" ]; then
-    # Eliminar las particiones existentes con parted
+    # Eliminar las particiones existentes con fdisk
     echo "Eliminando particiones existentes..."
-    parted -s $disk mklabel gpt # Crear una nueva tabla de particiones GPT
+    fdisk $disk <<EOF
+o
+w
+EOF
 
     echo "¡Listo!"
 else
