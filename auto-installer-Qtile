@@ -1,36 +1,29 @@
 #!/bin/bash
 
 # Advertencia al usuario
-echo "Este script instalará paquetes y realizará cambios en la configuración del sistema. Continuar? (y/n)"
+echo "Este script configurará LightDM y el archivo de inicio de sesión lightdm.conf. Continuar? (y/n)"
 read answer
 if [ "$answer" != "y" ]; then
-    echo "Abortando instalación."
+    echo "Abortando configuración."
     exit 1
 fi
 
 # Definir variables
 DM_PACKAGES="lightdm lightdm-gtk-greeter"
-WM_PACKAGES="qtile xterm code firefox rofi which nitrogen"
-FONT_PACKAGES="ttf-dejavu ttf-liberation noto-fonts"
-AUDIO_PACKAGES="pulseaudio pavucontrol pamixer"
-UTILS_PACKAGES="arandr udiskie ntfs-3g network-manager-applet volumeicon cbtticon xorg-xinit base-devel git thunar ranger glib2 gvfs lxappearance picom geeqie vlc"
 
-# Instalar paquetes
-echo "Instalando paquetes del sistema..."
-sudo pacman -S $DM_PACKAGES && \
-sudo pacman -S $WM_PACKAGES && \
-sudo pacman -S $FONT_PACKAGES && \
-sudo pacman -S $AUDIO_PACKAGES && \
-sudo pacman -S $UTILS_PACKAGES
+# Instalar paquetes de LightDM
+echo "Instalando paquetes de LightDM..."
+sudo pacman -S $DM_PACKAGES
 
-# Configurar archivo de inicio de sesión
-echo "Configurando archivo de inicio de sesión..."
+# Configurar archivo de inicio de sesión lightdm.conf
+echo "Configurando archivo de inicio de sesión lightdm.conf..."
 sudo nano /etc/lightdm/lightdm.conf
-echo "Asegúrate de cambiar de exampla a lightdm en greeter-session y también de gnome a greeter"
+
+echo "Asegúrate de cambiar 'example' a 'lightdm' en 'greeter-session' y también 'gnome' a 'greeter'."
 
 # Habilitar servicio de inicio de sesión
 echo "Habilitando servicio de inicio de sesión..."
 sudo systemctl enable lightdm.service
 
 # Mensaje final
-echo "La instalación ha finalizado correctamente. Recuerda verificar la configuración y realizar cualquier otro paso manualmente si es necesario."
+echo "La configuración de LightDM ha finalizado correctamente. Recuerda verificar el archivo /etc/lightdm/lightdm.conf para asegurarte de que los cambios se hayan aplicado correctamente."
