@@ -30,9 +30,5 @@ mkdir -p ~/.config/sxhkd
 cp /usr/share/doc/bspwm/examples/bspwmrc ~/.config/bspwm/
 cp /usr/share/doc/bspwm/examples/sxhkdrc ~/.config/sxhkd/
 
-# Configurar sxhkdrc para usar aplicaciones
-echo "Configurando sxhkdrc..."
-nano ~/.config/sxhkd/sxhkdrc
-
 # Mensaje final
 echo "La instalación de BSPWM y las aplicaciones adicionales ha finalizado correctamente. Recuerda verificar la configuración y realizar cualquier otro paso manualmente si es necesario."
