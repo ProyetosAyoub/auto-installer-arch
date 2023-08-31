@@ -8,18 +8,20 @@ if [ "$answer" != "y" ]; then
     exit 1
 fi
 
-# Definir variables para programas y paquetes de BSPWM
+# Definir variables para programas y paquetes
 WM_PACKAGES="bspwm sxhkd"
 FONT_PACKAGES="ttf-dejavu ttf-liberation noto-fonts"
 AUDIO_PACKAGES="alsa-utils pulseaudio pavucontrol"
-UTILS_PACKAGES="xorg xorg-xinit xterm dmenu feh"
+UTILS_PACKAGES="xorg xorg-xinit xterm dmenu feh pcmanfm code alacritty"
+POLYBAR_PACKAGE="polybar"
 
 # Instalar paquetes de programas
 echo "Instalando paquetes de programas..."
 sudo pacman -S $WM_PACKAGES && \
 sudo pacman -S $FONT_PACKAGES && \
 sudo pacman -S $AUDIO_PACKAGES && \
-sudo pacman -S $UTILS_PACKAGES
+sudo pacman -S $UTILS_PACKAGES && \
+sudo pacman -S $POLYBAR_PACKAGE
 
 # Configurar BSPWM (reemplaza con tus propias configuraciones)
 echo "Configurando BSPWM..."
@@ -28,5 +30,14 @@ mkdir -p ~/.config/sxhkd
 cp /usr/share/doc/bspwm/examples/bspwmrc ~/.config/bspwm/
 cp /usr/share/doc/bspwm/examples/sxhkdrc ~/.config/sxhkd/
 
+# Configurar sxhkdrc para usar aplicaciones
+echo "Configurando sxhkdrc..."
+echo "super + @space" >> ~/.config/sxhkd/sxhkdrc
+echo "    alacritty" >> ~/.config/sxhkd/sxhkdrc
+echo "super + @enter" >> ~/.config/sxhkd/sxhkdrc
+echo "    code" >> ~/.config/sxhkd/sxhkdrc
+echo "super + @p" >> ~/.config/sxhkd/sxhkdrc
+echo "    pcmanfm" >> ~/.config/sxhkd/sxhkdrc
+
 # Mensaje final
-echo "La instalación de BSPWM ha finalizado correctamente. Recuerda verificar la configuración y realizar cualquier otro paso manualmente si es necesario."
+echo "La instalación de BSPWM y las aplicaciones adicionales ha finalizado correctamente. Recuerda verificar la configuración y realizar cualquier otro paso manualmente si es necesario."
