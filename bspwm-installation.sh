@@ -32,12 +32,7 @@ cp /usr/share/doc/bspwm/examples/sxhkdrc ~/.config/sxhkd/
 
 # Configurar sxhkdrc para usar aplicaciones
 echo "Configurando sxhkdrc..."
-echo "super + @space" >> ~/.config/sxhkd/sxhkdrc
-echo "    alacritty" >> ~/.config/sxhkd/sxhkdrc
-echo "super + @enter" >> ~/.config/sxhkd/sxhkdrc
-echo "    code" >> ~/.config/sxhkd/sxhkdrc
-echo "super + @p" >> ~/.config/sxhkd/sxhkdrc
-echo "    pcmanfm" >> ~/.config/sxhkd/sxhkdrc
+nano ~/.config/sxhkd/sxhkdrc
 
 # Mensaje final
 echo "La instalación de BSPWM y las aplicaciones adicionales ha finalizado correctamente. Recuerda verificar la configuración y realizar cualquier otro paso manualmente si es necesario."
