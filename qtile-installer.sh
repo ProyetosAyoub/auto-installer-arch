@@ -1,25 +1,23 @@
 #!/bin/bash
 
 # Advertencia al usuario
-echo "Este script instalará paquetes y realizará cambios en la configuración del sistema. Continuar? (y/n)"
+echo "Este script instalará paquetes de programas. Continuar? (y/n)"
 read answer
 if [ "$answer" != "y" ]; then
-    echo "Abortando instalación."
+    echo "Abortando instalación de programas."
     exit 1
 fi
 
-# Definir variables para programas
-WM_PACKAGES="qtile xterm code firefox rofi which nitrogen"
+# Definir variables para paquetes de programas
+WM_PACKAGES="bspwm sxhkd"
 FONT_PACKAGES="ttf-dejavu ttf-liberation noto-fonts"
-AUDIO_PACKAGES="pulseaudio pavucontrol pamixer"
-UTILS_PACKAGES="arandr udiskie ntfs-3g network-manager-applet volumeicon cbtticon xorg-xinit base-devel git thunar ranger glib2 gvfs lxappearance picom geeqie vlc"
+AUDIO_PACKAGES="alsa-utils pulseaudio pavucontrol"
+POLYBAR_PACKAGE="polybar"
 
 # Instalar paquetes de programas
 echo "Instalando paquetes de programas..."
-sudo pacman -S $WM_PACKAGES && \
-sudo pacman -S $FONT_PACKAGES && \
-sudo pacman -S $AUDIO_PACKAGES && \
-sudo pacman -S $UTILS_PACKAGES
+sudo pacman -S $WM_PACKAGES
+sudo pacman -S $FONT_PACKAGES
+sudo pacman -S $AUDIO_PACKAGES
+sudo pacman -S $POLYBAR_PACKAGE
 
-# Mensaje final
-echo "La instalación de programas ha finalizado correctamente. Recuerda verificar la configuración y realizar cualquier otro paso manualmente si es necesario."
