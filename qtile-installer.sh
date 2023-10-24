@@ -20,4 +20,3 @@ sudo pacman -S $WM_PACKAGES
 sudo pacman -S $FONT_PACKAGES
 sudo pacman -S $AUDIO_PACKAGES
 sudo pacman -S $POLYBAR_PACKAGE
-
