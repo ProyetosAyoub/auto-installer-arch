@@ -12,7 +12,7 @@ fi
 WM_PACKAGES="bspwm sxhkd"
 FONT_PACKAGES="ttf-dejavu ttf-liberation noto-fonts"
 AUDIO_PACKAGES="alsa-utils pulseaudio pavucontrol"
-UTILS_PACKAGES="xorg xorg-xinit xterm dmenu feh pcmanfm code alacritty firefox arandr"
+UTILS_PACKAGES="xorg xorg-xinit xterm dmenu feh pcmanfm code alacritty"
 POLYBAR_PACKAGE="polybar"
 
 # Instalar paquetes de programas
