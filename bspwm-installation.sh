@@ -10,7 +10,7 @@ fi
 
 # Definir variables para los paquetes necesarios
 WM_PACKAGES="bspwm sxhkd"
-UTILS_PACKAGES="xorg dmenu"
+UTILS_PACKAGES="xorg dmenu alacritty"
 
 # Instalar paquetes necesarios
 echo "Instalando paquetes necesarios..."
